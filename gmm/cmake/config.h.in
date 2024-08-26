@@ -1,0 +1,4 @@
+#define EIGEN_NO_DEBUG
+
+#cmakedefine DEBUG_STATEMENTS
+#cmakedefine INTENSE_DEBUG_STATEMENTS

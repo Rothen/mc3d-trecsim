@@ -1,0 +1,9 @@
+**/__pycache__
+build*/
+debug-build/
+.DS_Store/
+**/.DS_Store
+Testing/
+lib/
+test/cpp/lib/
+CMakeSettings.json

@@ -1,0 +1,4 @@
+#define EIGEN_NO_DEBUG
+
+/* #undef DEBUG_STATEMENTS */
+/* #undef INTENSE_DEBUG_STATEMENTS */

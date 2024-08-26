@@ -1,0 +1,60 @@
+sources:
+- /path/to/recording_of_camera_001.mp4
+- /path/to/recording_of_camera_002.mp4
+calibration-file: /path/to/calibrated_cameras_data.yml
+
+auto-manage-hypothesis: true
+auto-manage-theta: true
+prefilter-key-points: true
+copy-last-thetas: true
+drag-along-unsupported-key-points: true
+undistort-images: true
+
+camera-distances:
+- 400.0
+- 400.0
+keypoints:
+- 0
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+keypoint-confidence-threshold: 0.5
+lbfgs-max-iterations: 10
+lbfgs-max-linesearch: 5
+max-fps: 25.0
+max-frame-buffer: 20
+max-iter: 5
+min-valid-key-points: 7
+not-supported-since-threshold: 5
+nu: 500.0
+num-support-cameras: 2
+responsibility-look-back: 10
+responsibility-support-threshold: 0.1
+spline-degree: 3
+spline-knot-delta: 1000.0
+spline-smoothing-factor: 100.0
+tol: 1.0e-06
+
+pause-at: -1
+show-floor: true
+show-video-feeds: true
+skip-frames: 0
+weights-file: data/models/yolov7/yolov7-w6-pose.pt
+azimuth: 0.0
+camera-ids: null
+center:
+- 0.0
+- 0.0
+- 0.0
+disable-visualiser: false
+distance: 0.0
+elevation: 0.0

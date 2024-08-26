@@ -1,0 +1,35 @@
+.DS_Store
+calibration/recordings/
+__pycache__
+calibration/MC-Calib
+opencv/
+build/
+data*/
+*.log
+repeat.py
+live.py
+proposal/
+live_configs/
+live_configs_comparisons/
+literature/
+helpers/
+documentation/
+calibration/
+2d_pose_estimators/
+# Created by https://www.gitignore.io/api/visualstudiocode
+# Edit at https://www.gitignore.io/?templates=visualstudiocode
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+**/.history
+leitner_calibrations/
+leitner_calibrations.zip
+
+# End of https://www.gitignore.io/api/visualstudiocode
