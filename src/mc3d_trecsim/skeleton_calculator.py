@@ -61,13 +61,13 @@ class SkeletonCalculator:
         )
         self.point_desing_matrix = gmm.spline.designMatrix(np.array([t_start]))
 
-        for person in self._separate_people(gmm, fit_results):
+        for p, person in enumerate(self._separate_people(gmm, fit_results)):
             thetas: npt.NDArray[np.double] = np.array([
                 person[KEYPOINT] for KEYPOINT in self.keypoints
             ])
 
             skeleton, paths = self._calculate_skeleton(thetas)
-            skeleton_valid, skeleton_keypoint_validity = self._calculate_skeleton_validity(skeleton)
+            skeleton_valid, skeleton_keypoint_validity = self._calculate_skeleton_validity(skeleton, fit_results, p)
 
             skeletons.append(skeleton)
             skeleton_paths.append(paths)
@@ -76,13 +76,13 @@ class SkeletonCalculator:
 
         return skeletons, skeleton_paths, skeleton_validities, skeleton_keypoint_validitites
 
-    def _calculate_skeleton_validity(self, skeleton: Skeleton) -> tuple[bool, SkeletonValidity]:
+    def _calculate_skeleton_validity(self, skeleton: Skeleton, fit_results: FitResults, person_index: int) -> tuple[bool, SkeletonValidity]:
         """Calculates the skeleton validity."""
         skeleton_valid: bool = False
         skeleton_keypoint_validity: SkeletonValidity = {}
 
         for keypoint in self.keypoints:
-            valid: bool = bool(1500 >= np.linalg.norm(skeleton[keypoint]) >= 100)
+            valid: bool = bool(1500 >= np.linalg.norm(skeleton[keypoint]) >= 100) and fit_results[keypoint]['supports'][person_index]
             skeleton_keypoint_validity[keypoint] = valid
             if valid:
                 skeleton_valid = True
