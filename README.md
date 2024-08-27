@@ -160,7 +160,7 @@ conda develop ./2d_pose_estimators/yolov7
 
 #### Pure Python
 
-Add the following lines to your `.bashrc`:
+Add the following lines to your `.bashrc` or `.zshrc`:
 
 ```bash
 export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/src"
