@@ -16,7 +16,9 @@
         1. [Building Python Bindings](#building-python-bindings)
         2. [Run C++ Unit Tests](#run-c-unit-tests)
         3. [Debug Testing](#debug-testing)
-    5. [Adding Python Libraries to Conda Environment](#adding-python-libraries-to-conda-environment)
+    5. [Adding Python Libraries to `PYTHONPATH`](#adding-python-libraries-to-pythonpath)
+        1. [Using Anaconda](#using-anaconda)
+        2. [Pure Python](#pure-python)
 2. [Run MC3D-TRECSIM](#run-mc3d-trecsim)
 3. [Calibration with MC-Calib](#calibration-with-mc-calib)
     1. [Install Docker on Ubuntu](#install-docker-on-ubuntu)
@@ -146,12 +148,24 @@ cmake --build gmm/build-debug -j
 ctest --test-dir gmm/build-debug/test/cpp
 ```
 
-### Adding Python Libraries to Conda Environment
+### Adding Python Libraries to `PYTHONPATH`
+
+#### Using Anaconda
 
 ```bash
-conda develop ./src/build
+conda develop ./src
 conda develop ./gmm/build
 conda develop ./2d_pose_estimators/yolov7
+```
+
+#### Pure Python
+
+Add the following lines to your `.bashrc`:
+
+```bash
+export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/src"
+export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/gmm/build"
+export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/2d_pose_estimators/yolov7"
 ```
 
 ## Run MC3D-TRECSIM
