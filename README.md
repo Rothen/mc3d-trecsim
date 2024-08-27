@@ -226,7 +226,7 @@ python run.py examples/three_people/configuration.yaml
 
 ## Calibration with MC-Calib
 
-A comprehensive guide on how to calibrate the cameras can be found on the GitHub repository [MC-Calib](https://github.com/rameau-fr/MC-Calib). However, an example Charuco board and configuration can be found in the `examples` folder and rough outline is described here:
+A comprehensive guide on how to calibrate the cameras can be found on the GitHub repository [MC-Calib](https://github.com/rameau-fr/MC-Calib). However, an example Charuco board and configuration can be found in the [`examples`](./examples) folder and rough outline is described here:
 
 ### Install Docker on Ubuntu
 
@@ -363,7 +363,7 @@ A comprehensive guide on how to calibrate the cameras can be found on the GitHub
 
 ### Visual Studio Code
 
-The `launch.json` and `c_cpp_properties.json` are configured to use the two environment variables `MC3D_TRECSIM_PYTHON_INCLUDE_PATH` and `MC3D_TRECSIM_PYTHON_INTERPRETER_PATH`. Add the following line to your `.bashrc` or `.zshrc` in order for the `c_cpp_properties.json` file to find the python include and interpreter paths.
+The [`launch.json`](./launch.json) and [`c_cpp_properties.json`](./c_cpp_properties.json) are configured to use the two environment variables `MC3D_TRECSIM_PYTHON_INCLUDE_PATH` and `MC3D_TRECSIM_PYTHON_INTERPRETER_PATH`. Add the following line to your `.bashrc` or `.zshrc`.
 
 ```bash
 export MC3D_TRECSIM_PYTHON_INCLUDE_PATH="/path/to/python/includes"
