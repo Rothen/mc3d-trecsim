@@ -1,0 +1,67 @@
+auto-manage-hypothesis: true
+auto-manage-theta: true
+azimuth: -99.0
+calibration-file: ./examples/three_people/calibrated_cameras_data.yml
+camera-distances:
+- 400.0
+- 400.0
+camera-ids: null
+center:
+- -0.3586472272872925
+- 3.689300537109375
+- 0.0
+copy-last-thetas: true
+csv-file: null
+disable-visualiser: false
+distance: 7.654180378664367
+drag-along-unsupported-key-points: true
+elevation: 31.0
+keypoint-confidence-threshold: 0.8
+keypoints:
+- 0
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+lbfgs-max-iterations: 10
+lbfgs-max-linesearch: 5
+max-fps: 25.0
+max-frame-buffer: 20
+max-iter: 5
+min-valid-key-points: 7
+not-supported-since-threshold: 10
+nu: 500.0
+num-support-cameras: 2
+pause-at: -1
+responsibility-look-back: 10
+responsibility-support-threshold: 0.1
+rotation-degrees:
+- -33.88
+- 1.79
+- -1.2
+seed: 1724351317
+show-floor: true
+show-video-feeds: true
+skip-frames: 200
+sources:
+- ./examples/three_people/stream_001.mp4
+- ./examples/three_people/stream_002.mp4
+spline-degree: 3
+spline-knot-delta: 1000.0
+spline-smoothing-factor: 100.0
+times-csv-file: null
+tol: 1.0e-06
+translation-vector:
+- 0.0
+- -230.0
+- 0.0
+undistort-images: true
+weights-file: ./data/models/yolov7/yolov7-w6-pose.pt
