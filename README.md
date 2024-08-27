@@ -43,6 +43,7 @@ pip install -r requirements.txt
 #### Download YOLOv7
 
 ```bash
+mkdir 2d_pose_estimators
 curl https://github.com/Rothen/yolov7/archive/refs/heads/main.zip -L -o 2d_pose_estimators/yolov7.zip
 unzip 2d_pose_estimators/yolov7.zip -d 2d_pose_estimators
 mv 2d_pose_estimators/yolov7-main 2d_pose_estimators/yolov7
@@ -59,7 +60,6 @@ pip install -r 2d_pose_estimators/yolov7/requirements.txt
 
 ```bash
 mkdir -p data/models/yolov7
-
 curl https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6-pose.pt -L -o data/models/yolov7/yolov7-w6-pose.pt
 ```
 
