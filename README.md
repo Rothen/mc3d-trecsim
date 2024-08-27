@@ -170,11 +170,11 @@ export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/2d_pose_estimators/yolov7"
 
 ## Run MC3D-TRECSIM
 
-To run MC3D-TRECSIM the file `run.py` is provided, which takes a YAML configuration file as an input. The configuration fields are described in the next section. Example configurations are provided for running on video files ([`examples/video_config.yaml`](`./examples/video_config.yaml`)) and live RTSP streams ([`examples/live_streams_config.yaml`](`./examples/live_streams_config.yaml`)). The script can be paused and resumed by pressing the `space bar` (only if sources are video files) and the current configuration settings (including camera position at current loop) can be saved by pressing the `P` key.
+To run MC3D-TRECSIM the file `run.py` is provided, which takes a YAML configuration file as an input. The configuration fields are described in the next section. Example configurations are provided for running on video files ([`examples/video_config.yaml`](./examples/video_config.yaml)) and live RTSP streams ([`examples/live_streams_config.yaml`](./examples/live_streams_config.yaml)). The script can be paused and resumed by pressing the `space bar` (only if sources are video files) and the current configuration settings (including camera position at current loop) can be saved by pressing the `P` key.
 
 ### Run Three People Example
 
-To see whether the installation worked, an example video of three people walking into the room, a configuration file and calibration file are provided in the [`examples/three_people`](`./examples/three_people`) folder. To run the example, execute:
+To see whether the installation worked, an example video of three people walking into the room, a configuration file and calibration file are provided in the [`examples/three_people`](./examples/three_people) folder. To run the example, execute:
 
 ```bash
 python run.py examples/three_people/configuration.yaml
