@@ -294,6 +294,10 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
         self.front_plane_text.setPlainText(
             '\n\n'.join(['\n'.join(value) for value in values]))
+    
+    def activate_window(self) -> None:
+        """Activates the window."""
+        self.main.activateWindow()
 
     def run_app(self) -> None:
         """Starts the event loop."""

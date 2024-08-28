@@ -94,6 +94,7 @@ def runner(args: LiveArgs):
             cv2.moveWindow(camera.id, *video_feed_position)
 
     cv2.startWindowThread()
+    visualizer.activate_window()
 
     i: int = 0
     fps_list: list[float] = []

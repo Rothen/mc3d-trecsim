@@ -303,6 +303,7 @@ class ParallelQtVisualizer(Process):
         self.line_updated: Event = manager.Event()
         self.scatter_updated: Event = manager.Event()
         self.camera_position_updated: Event = manager.Event()
+        self.activate_window_updated: Event = manager.Event()
         self.on_pause_event: Event = manager.Event()
         self.on_print_event: Event = manager.Event()
 
@@ -474,6 +475,10 @@ class ParallelQtVisualizer(Process):
         """Sets the camera position."""
         self.camera_position_data = self.camera_position_data + [(distance, azimuth, elevation, center[0], center[1], center[2])]
         self.camera_position_updated.set()
+    
+    def activate_window(self) -> None:
+        """Activates the window."""
+        self.activate_window_updated.set()
 
     def run(self) -> None:
         """Runs the visualizer."""
@@ -534,6 +539,10 @@ class ParallelQtVisualizer(Process):
                     for (distance, azimuth, elevation, center_x, center_y, center_z) in self.camera_position_data:
                         visualizer.set_camera_position(distance, azimuth, elevation, [center_x, center_y, center_z])
                     self.camera_position_data = []
+
+                if self.activate_window_updated.is_set():
+                    self.activate_window_updated.clear()
+                    visualizer.activate_window()
 
                 self.is_drawing.clear()
             except Exception as e:
