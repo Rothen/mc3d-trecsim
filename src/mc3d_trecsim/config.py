@@ -107,6 +107,7 @@ class LiveConfig(YAMLWizard):
     auto_start: bool = True
     video_feed_positions: Optional[list[list[int]]] = None
     visualizer_position: Optional[list[int]] = None
+    plot_sides: bool = False
 
     def check(self) -> None:
         """Check the arguments.

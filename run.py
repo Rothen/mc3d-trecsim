@@ -183,7 +183,7 @@ def runner(args: LiveArgs):
         if config.show_video_feeds:
             for frame, camera, kpts in zip(frames, cameras, all_kpts):
                 for person in kpts:
-                    paint_skeleton_on_image(frame, person, plot_side=False)
+                    paint_skeleton_on_image(frame, person, plot_sides=config.plot_sides)
                 cv2.imshow(camera.id, frame[::2, ::2])
             # cv2.startWindowThread()
 

@@ -3,7 +3,7 @@ import cv2
 
 from mc3d_trecsim.enums import KPT_NAMES, KPT_NAMES_SHORT, KPT_NAMES_SHORTER
 
-def paint_skeleton_on_image(image: np.ndarray, keypoints, plot_side: bool = False):
+def paint_skeleton_on_image(image: np.ndarray, keypoints, plot_sides: bool = False):
     #Plot the skeleton and keypointsfor coco datatset
     palette = np.array([[255, 128, 0], [255, 153, 51], [255, 178, 102],
                         [230, 230, 0], [255, 153, 255], [153, 204, 255],
@@ -44,7 +44,7 @@ def paint_skeleton_on_image(image: np.ndarray, keypoints, plot_side: bool = Fals
                 continue
             cv2.circle(image, (int(x_coord), int(y_coord)), radius, (int(r), int(g), int(b)), -1)
 
-            if plot_side:
+            if plot_sides:
                 offset = len(KPT_NAMES_SHORTER[kid])/2 * 10
                 cv2.putText(image, KPT_NAMES_SHORTER[kid], (int(x_coord - offset), int(
                     y_coord)), cv2.FONT_HERSHEY_SIMPLEX, 1.0,
