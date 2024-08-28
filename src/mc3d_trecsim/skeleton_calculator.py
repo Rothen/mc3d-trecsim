@@ -4,8 +4,7 @@ from typing import Callable, TypeAlias
 import numpy as np
 import numpy.typing as npt
 
-from mc3d_trecsim_gmm import GMM
-
+from .gmm import GMM
 from .mc3d_types import FitResults, Skeleton, SkeletonPath, SkeletonValidity
 
 def default_time_calc(gmm: GMM, fit_results: FitResults) -> tuple[float, float, float]:

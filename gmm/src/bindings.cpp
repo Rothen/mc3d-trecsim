@@ -37,7 +37,7 @@ using EMFitResultD = EMFitResult<double>;
 using MC3DModelD = MC3DModel<double>;
 using MultivariateNormalD = MultivariateNormal<double, 2>;
 
-PYBIND11_MODULE(mc3d_trecsim_gmm, m)
+PYBIND11_MODULE(gmm, m)
 {
     py::enum_<AUGMENTATION_MODE>(m, "AUGMENTATION_MODE")
         .value("UNIFORM", AUGMENTATION_MODE::UNIFORM)

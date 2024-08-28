@@ -154,7 +154,6 @@ ctest --test-dir gmm/build-debug/test/cpp
 
 ```bash
 conda develop ./src
-conda develop ./gmm/build
 conda develop ./2d_pose_estimators/yolov7
 ```
 
@@ -164,7 +163,6 @@ Add the following lines to your `.bashrc` or `.zshrc`:
 
 ```bash
 export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/src"
-export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/gmm/build"
 export PYTHONPATH="$PYTHONPATH:/path/to/mc3d-trecsim/2d_pose_estimators/yolov7"
 ```
 

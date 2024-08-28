@@ -17,6 +17,7 @@ documentation/
 calibration/
 2d_pose_estimators/
 mc3d-trecsim-priv/
+src/mc3d_trecsim/gmm.*
 # Created by https://www.gitignore.io/api/visualstudiocode
 # Edit at https://www.gitignore.io/?templates=visualstudiocode
 

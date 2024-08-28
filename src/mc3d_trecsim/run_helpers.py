@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation
 import numpy as np
 import numpy.typing as npt
 
-from mc3d_trecsim_gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
+from mc3d_trecsim.gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
 from mc3d_trecsim.args import LiveArgs
 from mc3d_trecsim.calibration import Calibration
 from mc3d_trecsim.model import PoseEstimator, YOLOv7

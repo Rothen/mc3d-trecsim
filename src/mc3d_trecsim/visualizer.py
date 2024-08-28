@@ -9,8 +9,7 @@ import numpy.typing as npt
 from PyQt6 import QtCore
 import PyQt6.QtWidgets as QtWidgets
 
-from mc3d_trecsim_gmm import Camera
-
+from .gmm import Camera
 from .enums import KPT_COLORS, LIMB_COLORS, LIMB_KPTS, Color, COLORS
 from .interval import Interval
 from .mc3d_types import ColorLike, ColorsLike, Skeleton, SkeletonPath, SkeletonValidity

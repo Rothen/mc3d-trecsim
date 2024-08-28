@@ -11,11 +11,11 @@ import time
 
 import numpy as np
 import numpy.typing as npt
-from mc3d_trecsim_gmm import Camera
 from PyQt6.QtCore import QTimer
 import PyQt6.QtCore as QtCore
 import PyQt6.QtWidgets as QtWidgets
 
+from .gmm import Camera
 from .enums import Color
 from .measurement import Measurement
 from .mc3d_types import Skeleton, SkeletonValidity, SkeletonPath

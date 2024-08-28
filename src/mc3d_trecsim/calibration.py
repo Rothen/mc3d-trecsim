@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from mc3d_trecsim_gmm import Camera
+from .gmm import Camera
 from pathlib import Path
 
 class Calibration:

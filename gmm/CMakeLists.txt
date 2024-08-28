@@ -19,6 +19,7 @@ endif(NOT LIB_FOLDER)
 CMAKE_DEPENDENT_OPTION(CREATE_BINDINGS "If `ON`: Creates pybind11 bindings for the core GMM algorithm. Ingored if cross compiling." ON "NOT CMAKE_CROSSCOMPILING" OFF)
 option(CREATE_MAIN "If `ON`: Creates a testable main file." ON)
 option(CREATE_TESTS "If `ON`: Creates the C++ tests using googletest." ON)
+option(COPY_TO_SOURCE "If `ON`: Copies the created .so and .pyi file to the mc3d-trecsim/src/mc3d-trecsim directory." ON)
 option(DEBUG_STATEMENTS "If `ON`: Prints information about the algorithm to the command line." OFF)
 option(INTENSE_DEBUG_STATEMENTS "If `ON`: Prints even more information about the algorithm to the command line. Slows the algorithm down immensly." OFF)
 
@@ -77,17 +78,31 @@ if(CREATE_BINDINGS)
     FetchContent_MakeAvailable(pybind11)
     include_directories(lib/pybind11/include)
 
-    pybind11_add_module(mc3d_trecsim_gmm src/bindings.cpp)
+    pybind11_add_module(gmm src/bindings.cpp)
 
-    target_compile_definitions(mc3d_trecsim_gmm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
-    target_link_libraries(mc3d_trecsim_gmm PRIVATE Eigen3::Eigen)
+    target_compile_definitions(gmm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+    target_link_libraries(gmm PRIVATE Eigen3::Eigen)
     list(APPEND PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}")
 
-    add_custom_command(TARGET mc3d_trecsim_gmm POST_BUILD
-        VERBATIM COMMAND python -c "import os; import sys; sys.path.insert(1, os.getcwd()); from pybind11_stubgen import main; import mc3d_trecsim_gmm; sys.argv[0] = 'pybind11-stubgen'; sys.argv.append('--ignore-all-errors'); sys.argv.append('-o'); sys.argv.append('.'); sys.argv.append('mc3d_trecsim_gmm'); main()" || (exit 0)
+    add_custom_command(TARGET gmm POST_BUILD
+        VERBATIM COMMAND python -c "import os; import sys; sys.path.insert(1, os.getcwd()); from pybind11_stubgen import main; import gmm; sys.argv[0] = 'pybind11-stubgen'; sys.argv.append('--ignore-all-errors'); sys.argv.append('-o'); sys.argv.append('.'); sys.argv.append('gmm'); main()" || (exit 0)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Creating stubs for MC3D-TRECSIM"
     )
+    if(COPY_TO_SOURCE)
+        SET(COPY_TO_PATH ../../src/mc3d_trecsim)
+        ADD_CUSTOM_COMMAND(TARGET gmm POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       $<TARGET_FILE:gmm>
+                       ${COPY_TO_PATH}
+                   COMMENT "Copying 'gmm' library to '${COPY_TO_PATH}/gmm.so'")
+                   
+        ADD_CUSTOM_COMMAND(TARGET gmm POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_CURRENT_BINARY_DIR}/gmm.pyi
+                       ${COPY_TO_PATH}
+                   COMMENT "Copying 'gmm' stubs to '${COPY_TO_PATH}/gmm.pyi'")
+    endif(COPY_TO_SOURCE)
 endif(CREATE_BINDINGS)
 
 if(CREATE_MAIN)

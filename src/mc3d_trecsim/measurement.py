@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import numpy.typing as npt
-from mc3d_trecsim_gmm import Camera
+from .gmm import Camera
 
 from .mc3d_types import Skeleton, SkeletonValidity
 from .enums import KPT_IDXS

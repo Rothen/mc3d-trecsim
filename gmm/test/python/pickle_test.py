@@ -1,6 +1,10 @@
-from mc3d_trecsim_gmm import Camera, Frame, GMMParam, LBFGSParam
+import sys
+
 import pickle
 import numpy as np
+
+sys.path.append('../../build')
+from gmm import Camera, Frame, GMMParam, LBFGSParam
 
 camera = Camera("")
 frame = Frame(camera, [], 1000, 8000)

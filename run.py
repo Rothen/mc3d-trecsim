@@ -10,7 +10,7 @@ import cv2
 from scipy.spatial.transform import Rotation
 import numpy as np
 
-from mc3d_trecsim_gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
+from mc3d_trecsim.gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
 from mc3d_trecsim.args import LiveArgs
 from mc3d_trecsim.model import PoseEstimator
 from mc3d_trecsim.plotting import paint_skeleton_on_image

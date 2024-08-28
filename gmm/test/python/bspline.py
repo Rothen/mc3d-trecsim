@@ -1,6 +1,10 @@
+import sys
+
 import numpy as np
-from mc3d_trecsim_gmm import BSpline, AUGMENTATION_MODE
 import matplotlib.pyplot as plt
+
+sys.path.append('../../build')
+from gmm import BSpline, AUGMENTATION_MODE
 
 np.set_printoptions(edgeitems=30, linewidth=100000, precision=15)
 

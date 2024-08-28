@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import gmm
 import matplotlib.pyplot as plt
-from mc3d_trecsim_gmm import MC3DModel, GMMContainer, Camera, BSpline, AUGMENTATION_MODE, GMMParam
+from .gmm import MC3DModel, GMMContainer, Camera, BSpline, AUGMENTATION_MODE, GMMParam
 from typing import Any, Callable
 
 print(float(1000 * np.finfo(np.float32).eps))
