@@ -9,19 +9,22 @@ import typed_argparse as tap
 import cv2
 from scipy.spatial.transform import Rotation
 import numpy as np
-import numpy.typing as npt
 
 from mc3d_trecsim_gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
 from mc3d_trecsim.args import LiveArgs
-from mc3d_trecsim.calibration import Calibration
-from mc3d_trecsim.model import PoseEstimator, YOLOv7
+from mc3d_trecsim.model import PoseEstimator
 from mc3d_trecsim.plotting import paint_skeleton_on_image
-from mc3d_trecsim.video_streamer import VideoStreamer
 from mc3d_trecsim.skeleton_calculator import SkeletonCalculator
 from mc3d_trecsim.parallel_qt_visualizer import ParallelQtVisualizer
-from mc3d_trecsim.enums import KPT_IDXS, COLORS
 from mc3d_trecsim.config import LiveConfig
-from mc3d_trecsim.run_helpers import create_cameras, create_visualizer, create_or_load_config, create_pose_estimator, create_gmm_param, create_video_streamers, signal_handler, cleanup
+from mc3d_trecsim.run_helpers import create_cameras, \
+    create_visualizer, \
+    create_or_load_config, \
+    create_pose_estimator, \
+    create_gmm_param, \
+    create_video_streamers, \
+    signal_handler, \
+    cleanup
 
 
 def runner(args: LiveArgs):
@@ -88,7 +91,6 @@ def runner(args: LiveArgs):
     cv2.startWindowThread()
 
     i: int = 0
-    initial_loop: bool = False
     fps_list: list[float] = []
     start: float = time.perf_counter()
     fps_start: float = time.perf_counter()
@@ -168,10 +170,6 @@ def runner(args: LiveArgs):
         inference_start = time.perf_counter()
         all_kpts = pose_estimator.predict(frames)
         inference_end = time.perf_counter()
-
-        if initial_loop:
-            initial_loop = False
-            continue
 
         if start_timestamp == 0.0:
             start_timestamp = timestamps[0]
