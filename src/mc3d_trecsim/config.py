@@ -104,6 +104,7 @@ class LiveConfig(YAMLWizard):
     center: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     csv_file: Optional[str] = None
     times_csv_file: Optional[str] = None
+    auto_start: bool = True
 
     def check(self) -> None:
         """Check the arguments.

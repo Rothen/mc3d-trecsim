@@ -213,6 +213,7 @@ python run.py examples/three_people/configuration.yaml
 | `disable-visualiser` | Does not show the 3D reconstruction visualization if set to `true`. | `bool` | `false` |
 | `show-video-feeds` | Whether to show the video feeds of the cameras with the skeletons plotted on them. | `bool` | `true` |
 | `show-floor` | Whether to plot the floor grid in the 3D visualizer. | `bool` | `true` |
+| `auto-start` | If sources are video files and false: Pauses the script at the beginning of the video. | `bool` | `true` |
 | `skip-frames` | If sources are video files: Can be used to skip a certain amount of frames. | `int` | `0` |
 | `pause-at` | If sources are video files: Automatically pauses the script the defined loop number. | `int` | `-1` |
 | `rotation-degrees` | The rotation of the center camera to ground in every axis. | `list[float]` | - |

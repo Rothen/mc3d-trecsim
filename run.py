@@ -99,7 +99,7 @@ def runner(args: LiveArgs):
     pause_start: float = 0.0
     pause_delay: float = 0.0
     current_loop: int = 0
-    paused: bool = False
+    paused: bool = not is_live and not config.auto_start
 
     def on_pause(visualizer: ParallelQtVisualizer):
         nonlocal paused, pause_start, pause_delay
