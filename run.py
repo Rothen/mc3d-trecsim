@@ -88,6 +88,11 @@ def runner(args: LiveArgs):
 
     for camera, empty_image in zip(cameras, empty_images):
         cv2.imshow(camera.id, empty_image[::2, ::2])
+
+    if config.video_feed_positions is not None:
+        for camera, video_feed_position in zip(cameras, config.video_feed_positions):
+            cv2.moveWindow(camera.id, *video_feed_position)
+
     cv2.startWindowThread()
 
     i: int = 0
@@ -179,7 +184,7 @@ def runner(args: LiveArgs):
                 for person in kpts:
                     paint_skeleton_on_image(frame, person, plot_side=False)
                 cv2.imshow(camera.id, frame[::2, ::2])
-            cv2.startWindowThread()
+            # cv2.startWindowThread()
 
         post_inference_start = time.perf_counter()
         ziped = zip(frames, all_kpts, timestamps, list(enumerate(cameras)))

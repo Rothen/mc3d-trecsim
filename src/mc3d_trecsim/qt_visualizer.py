@@ -78,7 +78,8 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
                  auto_init: bool = True,
                  on_pause: Callable[[Any], None] = lambda _: None,
                  on_print: Callable[[Any], None] = lambda _: None,
-                 show_floor: bool = True
+                 show_floor: bool = True,
+                 position: list[int] = None
             ):
         """Initializes the visualizer.
 
@@ -117,6 +118,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         self.on_pause: Callable[[Any], None] = on_pause
         self.on_print: Callable[[Any], None] = on_print
         self.show_floor: bool = show_floor
+        self.position: list[int] = position
 
         if auto_init:
             self.init_app()
@@ -145,7 +147,10 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
             QtCore.Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
 
         self.main = QtWidgets.QMainWindow()
-        self.main.move(int(1920/4), int(1080/4))
+        if self.position is not None:
+            self.main.move(self.position[0], self.position[1])
+        else:
+            self.main.move(int(1920/4), int(1080/4))
         self.main.setFixedSize(int(1920/2), int(1080/2))
         # self.main.setWindowFlags(
         #     QtCore.Qt.WindowType.CustomizeWindowHint | QtCore.Qt.WindowType.FramelessWindowHint)

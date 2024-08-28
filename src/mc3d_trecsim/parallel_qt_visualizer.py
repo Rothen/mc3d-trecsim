@@ -255,7 +255,8 @@ class ParallelQtVisualizer(Process):
                  max_fps: float = 25,
                  on_pause: Callable[[Any], None] = lambda _: None,
                  on_print: Callable[[Any], None] = lambda _: None,
-                 show_floor: bool = True
+                 show_floor: bool = True,
+                 position: list[int] = None
                  ) -> None:
         """Initializes the visualizer.
 
@@ -288,6 +289,7 @@ class ParallelQtVisualizer(Process):
         self.on_pause: Callable[[Any], None] = on_pause
         self.on_print: Callable[[Any], None] = on_print
         self.show_floor: bool = show_floor
+        self.position: list[int] = position
 
         if len(self.keypoints) == 0:
             logging.warning('Visualizer has no keypoints set.')
@@ -488,7 +490,8 @@ class ParallelQtVisualizer(Process):
             auto_init=False,
             on_pause=lambda _: self.on_pause_event.set(),
             on_print=lambda _: self.on_print_event.set(),
-            show_floor=self.show_floor
+            show_floor=self.show_floor,
+            position=self.position
         )
         visualizer.init_app()
         self.started.set()

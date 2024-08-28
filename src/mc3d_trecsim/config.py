@@ -105,6 +105,8 @@ class LiveConfig(YAMLWizard):
     csv_file: Optional[str] = None
     times_csv_file: Optional[str] = None
     auto_start: bool = True
+    video_feed_positions: Optional[list[list[int]]] = None
+    visualizer_position: Optional[list[int]] = None
 
     def check(self) -> None:
         """Check the arguments.
@@ -130,3 +132,14 @@ class LiveConfig(YAMLWizard):
 
         if not weights_path.is_file():
             raise ValueError(f'Weights file {weights_path} is not a file.')
+        
+        if self.video_feed_positions is not None:
+            if len(self.video_feed_positions) != len(self.sources):
+                raise ValueError('The number of video feed positions and sources must be the same.')
+            for video_feed_position in self.video_feed_positions:
+                if len(video_feed_position) != 2:
+                    raise ValueError('The video feed position must have two elements.')
+                
+        if self.visualizer_position is not None:
+            if len(self.visualizer_position) != 2:
+                raise ValueError('The visualizer position must have two elements.')

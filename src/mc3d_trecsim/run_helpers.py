@@ -79,7 +79,8 @@ def create_visualizer(
                                           ([KPT_IDXS.NOSE, KPT_IDXS.LEFT_SHOULDER],
                                            COLORS.GREEN)
                                       ],
-                                      show_floor=config.show_floor
+                                      show_floor=config.show_floor,
+                                      position=config.visualizer_position
                                       )
     visualizer.visualise_cameras(
         cameras, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
