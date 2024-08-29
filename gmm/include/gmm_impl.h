@@ -434,10 +434,10 @@ namespace MC3D_TRECSIM
                 int nValidKeyPoints = 0;
                 for (auto KEYPOINT : gmmParam.KEYPOINTS)
                 {
-                    if (!cameras[frame.cameraIndex].isPointInFrame(frame.kpts[p].row(KEYPOINT).head(2)))
+                    /*if (!cameras[frame.cameraIndex].isPointInFrame(frame.kpts[p].row(KEYPOINT).head(2)))
                     {
                         frame.kpts[p](KEYPOINT, 2) = 0;
-                    }
+                    }*/
 
                     if (frame.kpts[p](KEYPOINT, 2) >= gmmParam.keypointConfidenceThreshold)
                     {
