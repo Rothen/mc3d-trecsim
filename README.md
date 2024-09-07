@@ -2,6 +2,12 @@
 
 MC3D-TRECSIM, or Multi-Camera 3D Trajectory Reconstruction for Enhanced Crowd Safety and Infrastructure Monitoring, is a system developed to improve surveillance tasks in crowded environments and automated infrastructures. It integrates data from multiple camera feeds to generate a comprehensive 3D representation of individuals, including their poses and positions. The system uses 2D pose estimation algorithms to extract spatial data, which are fused into accurate 3D reconstructions, allowing for precise tracking and prediction of the movements of multiple individuals. This innovation is aimed at enhancing crowd safety and monitoring the infrastructure in real-time.
 
+![Frame of camera 1](examples/images/three_subjects_01.png "Frame of camera 1")
+
+![Frame of camera 2](examples/images/three_subjects_02.png "Frame of camera 2")
+
+![3D reconstruction three people.](examples/images/three_subjects_3d.png "3D reconstruction three people.")
+
 ## Table of Contents
 
 1. [Installation](#installation)
