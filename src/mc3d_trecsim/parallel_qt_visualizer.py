@@ -16,9 +16,9 @@ import PyQt6.QtCore as QtCore
 import PyQt6.QtWidgets as QtWidgets
 
 from .gmm import Camera
-from .enums import Color
+from .enums import LIMB_KPTS, LIMBS, Color
 from .measurement import Measurement
-from .mc3d_types import Skeleton, SkeletonValidity, SkeletonPath
+from .mc3d_types import Limb, Skeleton, SkeletonValidity, SkeletonPath
 from .qt_visualizer import QtVisualizer
 
 
@@ -250,7 +250,7 @@ class ParallelQtVisualizer(Process):
                  rotation_matrix: npt.NDArray[np.double] = np.eye(3),
                  translation_vector: npt.NDArray[np.double] = np.zeros((3, 1)),
                  project_feet_to_ground: bool = False,
-                 additional_limbs: list[tuple[Annotated[list[int], 2], Color]] | None = None,
+                 limbs: list[Limb] = LIMBS,
                  measurements: list[Measurement[Any]] | None = None,
                  max_fps: float = 25,
                  on_pause: Callable[[Any], None] = lambda _: None,
@@ -269,8 +269,8 @@ class ParallelQtVisualizer(Process):
                 vector. Defaults to np.zeros((3, 1)).
             project_feet_to_ground (bool, optional): Whether to project the feet to the
                 ground. Defaults to False.
-            additional_limbs (list[tuple[Annotated[list[int], 2], Color]] | None, optional):
-                Additional limbs to draw. Defaults to [].
+            limbs (list[tuple[Annotated[list[int], 2], Color]] | None, optional):
+                Limbs to draw. Defaults to [].
             measurements (list[Measurement[Any]] | None, optional): The measurements to show.
             max_fps (float): The maximum frames per second. Defaults to 25.
             show_floor (bool, optional): Whether to show the floor. Defaults to True.
@@ -282,7 +282,7 @@ class ParallelQtVisualizer(Process):
         self.rotation_matrix = rotation_matrix
         self.translation_vector = translation_vector
         self.project_feet_to_ground = project_feet_to_ground
-        self.additional_limbs = additional_limbs if additional_limbs is not None else []
+        self.limbs = limbs if limbs is not None else []
         self.measurements = measurements if measurements is not None else []
         self.max_fps: float = max_fps
         self.visualizer: QtVisualizer = QtVisualizer(auto_init=False)
@@ -490,7 +490,7 @@ class ParallelQtVisualizer(Process):
             self.rotation_matrix,
             self.translation_vector,
             self.project_feet_to_ground,
-            self.additional_limbs,
+            self.limbs,
             self.measurements,
             auto_init=False,
             on_pause=lambda _: self.on_pause_event.set(),

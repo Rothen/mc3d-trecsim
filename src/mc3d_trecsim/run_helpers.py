@@ -1,29 +1,21 @@
 """Live pose estimation and tracking using GMMs."""
 import sys
-import os
-import signal
 import logging
-import time
 from pathlib import Path
-from typing import Any, TypeVar, cast
-import torch
+from typing import TypeVar, cast
 
-import typed_argparse as tap
 import cv2
-from scipy.spatial.transform import Rotation
 import numpy as np
 import numpy.typing as npt
 
-from mc3d_trecsim.gmm import GMM, Camera, Frame, GMMParam, LBFGSParam
-from mc3d_trecsim.args import LiveArgs
-from mc3d_trecsim.calibration import Calibration
-from mc3d_trecsim.model import PoseEstimator, YOLOv7
-from mc3d_trecsim.plotting import paint_skeleton_on_image
-from mc3d_trecsim.video_streamer import VideoStreamer
-from mc3d_trecsim.skeleton_calculator import SkeletonCalculator
-from mc3d_trecsim.parallel_qt_visualizer import ParallelQtVisualizer
-from mc3d_trecsim.enums import KPT_IDXS, COLORS
-from mc3d_trecsim.config import LiveConfig
+from .gmm import  Camera, GMMParam
+from .args import LiveArgs
+from .calibration import Calibration
+from .model import PoseEstimator, YOLOv7
+from .video_streamer import VideoStreamer
+from .parallel_qt_visualizer import ParallelQtVisualizer
+from .enums import KPT_IDXS, COLORS, LIMB_KPTS, LIMBS
+from .config import LiveConfig
 
 
 def create_cameras(config: LiveConfig) -> list[Camera]:
@@ -73,7 +65,7 @@ def create_visualizer(
     """
     visualizer = ParallelQtVisualizer(config.keypoints,
                                       project_feet_to_ground=False,
-                                      additional_limbs=[
+                                      limbs=LIMBS + [
                                           ([KPT_IDXS.NOSE, KPT_IDXS.RIGHT_SHOULDER],
                                            COLORS.GREEN),
                                           ([KPT_IDXS.NOSE, KPT_IDXS.LEFT_SHOULDER],

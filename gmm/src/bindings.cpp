@@ -325,6 +325,8 @@ PYBIND11_MODULE(gmm, m)
         .def_readonly("gmmContainers", &GMMD::gmmContainers)
         .def_readonly("frames", &GMMD::frames)
         .def_readonly("J", &GMMD::J)
+        .def_readonly("gmmParam", &GMMD::gmmParam)
+        .def_readonly("cameras", &GMMD::cameras)
         .def(
             "fit",
             [](GMMD &gmm, const std::map<int, ColMatrixD> &initialThetas, const std::map<int, VectorD> &initialPis)

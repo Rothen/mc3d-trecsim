@@ -10,7 +10,7 @@ from PyQt6 import QtCore
 import PyQt6.QtWidgets as QtWidgets
 
 from .gmm import Camera
-from .enums import KPT_COLORS, LIMB_COLORS, LIMB_KPTS, Color, COLORS
+from .enums import KPT_COLORS, LIMB_COLORS, LIMB_KPTS, LIMBS, Color, COLORS
 from .interval import Interval
 from .mc3d_types import ColorLike, ColorsLike, Skeleton, SkeletonPath, SkeletonValidity
 
@@ -32,7 +32,7 @@ class Visualizer(ABC, Generic[IT]):
                  correct_axis: bool = False,
                  scale_factor: float = 1.0,
                  project_feet_to_ground: bool = False,
-                 additional_limbs: list[Limb] | None = None,
+                 limbs: list[Limb] = LIMBS
                  ) -> None:
         """Initializes the visualizer.
 
@@ -46,14 +46,13 @@ class Visualizer(ABC, Generic[IT]):
             scale_factor (float, optional): A scale factor. Defaults to 1.0.
             project_feet_to_ground (bool, optional): Whether to project the feet to the ground.
                 Defaults to False.
-            additional_limbs (list[Limb], optional): Additional
+            limbs (list[Limb], optional): Additional
                 limbs to draw. Defaults to [].
         """
         self.rotation_matrix: npt.NDArray[np.double] = rotation_matrix
         self.translation_vector: npt.NDArray[np.double] = translation_vector
         self.keypoints: Sequence[int] = keypoints if keypoints is not None else []
-        self.additional_limbs: list[Limb] = \
-            additional_limbs if additional_limbs is not None else []
+        self.limbs: list[Limb] = limbs
         self.path_t_start: float = -1
         self.skeletons: list[Skeleton] = []
         self.correct_axis: bool = correct_axis
@@ -306,24 +305,7 @@ class Visualizer(ABC, Generic[IT]):
 
         items: list[IT] = []
 
-        for limb_index, limb_joints in LIMB_KPTS.items():
-            are_joints_valid = True
-
-            for joint in limb_joints:
-                if joint not in skeleton or not skeleton_validity[joint]:
-                    are_joints_valid = False
-                    break
-
-            if are_joints_valid:
-                items += self.draw_3d_line(
-                    skeleton[limb_joints[0]],
-                    skeleton[limb_joints[1]],
-                    color=LIMB_COLORS[limb_index],
-                    draw_point=True,
-                    linewidth=6
-                )
-
-        for joints, color in self.additional_limbs:
+        for joints, color in self.limbs:
             are_joints_valid = True
 
             for joint in joints:
@@ -339,6 +321,7 @@ class Visualizer(ABC, Generic[IT]):
                     draw_point=True,
                     linewidth=6
                 )
+
         self.skeletons.append(skeleton)
         return items
 

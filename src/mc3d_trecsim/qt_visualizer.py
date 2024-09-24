@@ -11,6 +11,7 @@ import pyqtgraph.opengl as gl
 from pyqtgraph.opengl.GLGraphicsItem import GLGraphicsItem
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsTextItem
 
+from .enums import LIMB_KPTS, LIMBS
 from .mc3d_types import ColorsLike
 from .visualizer import Limb, Visualizer
 from .measurement import Measurement, Skeleton
@@ -73,7 +74,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
                  rotation_matrix: npt.NDArray[np.double] = np.eye(3),
                  translation_vector: npt.NDArray[np.double] = np.zeros((3, 1)),
                  project_feet_to_ground: bool = False,
-                 additional_limbs: list[Limb] | None = None,
+                 limbs: list[Limb] = LIMBS,
                  measurements: list[Measurement[float]] | None = None,
                  auto_init: bool = True,
                  on_pause: Callable[[Any], None] = lambda _: None,
@@ -92,8 +93,8 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
                 vector. Defaults to np.zeros((3, 1)).
             project_feet_to_ground (bool, optional): Whether to project the feet to the
                 ground. Defaults to False.
-            additional_limbs (list[tuple[Annotated[list[int], 2], Color]] | None, optional):
-                Additional limbs to draw. Defaults to [].
+            limbs (list[tuple[Annotated[list[int], 2], Color]] | None, optional):
+                Limbs to draw. Defaults to [].
             measurements (list[Measurement[Any]] | None, optional): The measurements to show. Defaults to [].
             auto_init (bool, optional): Whether to automatically initialize the visualizer.
                 Defaults to True.
@@ -107,7 +108,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
             correct_axis=True,
             scale_factor=1e-2,
             project_feet_to_ground=project_feet_to_ground,
-            additional_limbs=additional_limbs
+            limbs=limbs
         )
 
         # pylint: disable=c-extension-no-member
