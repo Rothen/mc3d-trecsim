@@ -43,7 +43,8 @@ namespace MC3D_TRECSIM
         times(Vector<Scalar>::Zero(0)),
         hypothesisManager(cameras, gmmParam),
         gmmMaximizer(spline, designMatrix, hGrads, cameras, gmmParam, lbfgsParam),
-        em(gmmParam.maxIter, gmmParam.tol, gmmMaximizer)
+        em(gmmParam.maxIter, gmmParam.tol, gmmMaximizer),
+        hypothesisIds({})
     {
         designMatrix = RowMatrix<Scalar>::Zero(0, 0);
         spline = BSpline<Scalar>(gmmParam.splineDegree, UNIFORM),
@@ -293,6 +294,8 @@ namespace MC3D_TRECSIM
 
                 gmmContainer.hypothesisChanged = true;
             }
+
+            hypothesisIds.push_back(currentHypothesisId++);
         }
 
         for (auto KEYPOINT : gmmParam.KEYPOINTS)
@@ -332,6 +335,8 @@ namespace MC3D_TRECSIM
 
                 gmmContainer.hypothesisChanged = true;
             }
+
+            hypothesisIds.erase(hypothesisIds.begin() + index);
         }
 
         hypothesisManager.removeHypothesis(index);

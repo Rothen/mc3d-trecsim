@@ -333,13 +333,14 @@ PYBIND11_MODULE(gmm, m)
             {
                 std::map<int, EMFitResultD> fitResults = gmm.fit(initialThetas, initialPis);
                 py::dict pyFitResults;
+                pyFitResults["hypothesis_ids"] = gmm.hypothesisIds;
 
                 for (auto fitResult : fitResults)
                 {
                     py::dict pyFitResult(
                         "theta"_a = fitResult.second.parameters.theta,
                         "pi"_a = fitResult.second.parameters.pi,
-                        "designMatrix"_a = fitResult.second.designMatrix,
+                        "design_matrix"_a = fitResult.second.designMatrix,
                         "diff"_a = fitResult.second.diff,
                         "convergence"_a = fitResult.second.convergence,
                         "responsibilities"_a = fitResult.second.responsibilities,

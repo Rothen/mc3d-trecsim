@@ -44,6 +44,7 @@ namespace MC3D_TRECSIM
         HypothesisManager<Scalar> hypothesisManager;
         GMMMaximizer<Scalar> gmmMaximizer;
         EM<Scalar> em;
+        std::vector<unsigned long> hypothesisIds;
 
         GMM(int J, std::vector<Camera<Scalar>> camerasE, GMMParam<Scalar> gmmParamE, LBFGSpp::LBFGSParam<Scalar> lbfgsParamE);
 
@@ -80,6 +81,7 @@ namespace MC3D_TRECSIM
 
     private:
         WorldPoint<Scalar> tempSupportedMeanPoint = WorldPoint<Scalar>::Zero(3);
+        unsigned long currentHypothesisId = 0;
 
         void initGMMContainers();
     };
