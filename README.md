@@ -389,3 +389,16 @@ cmake --build . -j
 valgrind --tool=callgrind ./main ../../data/precalculated_keypoints/frames_carmen_beni.json
 kcachegrind
 ```
+
+## V2
+
+### Install LibTorch
+
+```bash
+mkdir gmm/lib
+curl https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.5.0%2Bcpu.zip -L -o gmm/lib/libtorch.zip
+unzip gmm/lib/libtorch.zip -d gmm/lib/libtorch_unzip
+rm -rf gmm/lib/libtorch.zip
+mv gmm/lib/libtorch_unzip/libtorch gmm/lib/libtorch
+rm -rf gmm/lib/libtorch_unzip
+```

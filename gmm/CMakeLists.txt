@@ -4,6 +4,8 @@ include(CMakeDependentOption)
 include(FetchContent)
 
 project(pybind_gmm)
+set(CMAKE_PREFIX_PATH "./lib/libtorch/")
+find_package(Torch REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -82,6 +84,7 @@ if(CREATE_BINDINGS)
 
     target_compile_definitions(gmm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
     target_link_libraries(gmm PRIVATE Eigen3::Eigen)
+    target_link_libraries(gmm PRIVATE "${TORCH_LIBRARIES}")
     list(APPEND PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}")
 
     add_custom_command(TARGET gmm POST_BUILD
