@@ -44,7 +44,7 @@ using torch::Tensor;
 
 PYBIND11_MODULE(gmm, m)
 {
-    m.def("tensor", [](Tensor t) { return t; });
+    m.def("tensor", [](Tensor t) { return t; }, py::arg("t"));
 
     py::enum_<AUGMENTATION_MODE>(m, "AUGMENTATION_MODE")
         .value("UNIFORM", AUGMENTATION_MODE::UNIFORM)
