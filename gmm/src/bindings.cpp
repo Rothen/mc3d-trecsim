@@ -12,6 +12,8 @@
 #include <pybind11/stl.h>
 #include <pybind11/complex.h>
 #include <pybind11/functional.h>
+#include <torch/torch.h>
+#include <torch/extension.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -37,8 +39,13 @@ using EMFitResultD = EMFitResult<double>;
 using MC3DModelD = MC3DModel<double>;
 using MultivariateNormalD = MultivariateNormal<double, 2>;
 
+using namespace torch::autograd;
+using torch::Tensor;
+
 PYBIND11_MODULE(gmm, m)
 {
+    m.def("tensor", [](Tensor t) { return t; });
+
     py::enum_<AUGMENTATION_MODE>(m, "AUGMENTATION_MODE")
         .value("UNIFORM", AUGMENTATION_MODE::UNIFORM)
         .value("SAME", AUGMENTATION_MODE::SAME)

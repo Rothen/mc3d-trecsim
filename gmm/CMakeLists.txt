@@ -83,12 +83,13 @@ if(CREATE_BINDINGS)
     pybind11_add_module(gmm src/bindings.cpp)
 
     target_compile_definitions(gmm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
-    target_link_libraries(gmm PRIVATE Eigen3::Eigen)
-    target_link_libraries(gmm PRIVATE "${TORCH_LIBRARIES}")
+    find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
+    target_link_libraries(gmm PRIVATE Eigen3::Eigen ${TORCH_LIBRARIES} ${TORCH_PYTHON_LIBRARY})
+
     list(APPEND PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}")
 
     add_custom_command(TARGET gmm POST_BUILD
-        VERBATIM COMMAND python -c "import os; import sys; sys.path.insert(1, os.getcwd()); from pybind11_stubgen import main; import gmm; sys.argv[0] = 'pybind11-stubgen'; sys.argv.append('--ignore-all-errors'); sys.argv.append('-o'); sys.argv.append('.'); sys.argv.append('gmm'); main()" || (exit 0)
+        VERBATIM COMMAND python -c "import os; import torch; import sys; sys.path.insert(1, os.getcwd()); from pybind11_stubgen import main; import gmm; sys.argv[0] = 'pybind11-stubgen'; sys.argv.append('--ignore-all-errors'); sys.argv.append('-o'); sys.argv.append('.'); sys.argv.append('gmm'); main()" ||(exit 0)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Creating stubs for MC3D-TRECSIM"
     )
