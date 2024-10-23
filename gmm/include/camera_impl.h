@@ -3,113 +3,45 @@
 
 #include "camera.h"
 
-#include <Eigen/Core>
-#include <string>
+using namespace torch::indexing;
 
-namespace MC3D_TRECSIM
+namespace mc3d
 {
-    template <typename Scalar>
-    Camera<Scalar>::Camera(std::string id, IntrinsicMatrix<Scalar> A, DistortionVector<Scalar> d, ExtrinsicMatrix<Scalar> P, unsigned int height, unsigned int width, Scalar distance) :
+    Camera::Camera(std::string id, Tensor A, Tensor d, Tensor P, unsigned int height, unsigned int width, RealType distance) :
         id(id)
     {
-        setCalibration(std::move(A), std::move(d), std::move(P), height, width);
+        calibrate(A, d, P, height, width, distance);
     }
 
-    template <typename Scalar>
-    inline void Camera<Scalar>::setCalibration(IntrinsicMatrix<Scalar> A, DistortionVector<Scalar> d, ExtrinsicMatrix<Scalar> P, unsigned int height, unsigned int width, Scalar distance)
+    void Camera::calibrate(Tensor A, Tensor d, Tensor P, unsigned int height, unsigned int width, RealType distance)
     {
-        this->A = std::move(A);
-        this->d = std::move(d);
-        this->P = std::move(P);
+        this->A = A;
+        this->d = d;
+        this->P = P;
         this->height = height;
         this->width = width;
         this->distance = distance;
-
-        Ainv = A.inverse();
-        R = P.topLeftCorner(3, 3);
-        RT = R.transpose();
-        t = P.col(3).head(3);
+        this->Ainv = A.inverse();
+        this->R = P.index({Slice(0, 3), Slice(0, 3)});
+        this->RT = R.transpose(0, 1);
+        this->t = P.index({Slice(0, 3), Slice(3, 4)});
     }
 
-    template <typename Scalar>
-    inline WorldPoints<Scalar> Camera<Scalar>::toCameraCoordinates(const WorldPoints<Scalar> &PWs) const
+    Point2 Camera::transform_3d_to_2d(Point3 P) const
     {
-        WorldPoints<Scalar> PCs = RT * (PWs - t);
-
-        for (int c = 0; c < PCs.cols(); c++)
-        {
-            if (PCs.col(c)[2] == 0)
-            {
-                PCs.col(c) << 0.0, 0.0, 1.0;
-            }
-        }
-
-        return PCs; // (RT * (PWs - t)).colwise() + limiter;
+        Point3 PC = RT.mm(P - t);
+        return A.mm(PC / PC[2]).index({Slice(0, 2), Slice(0, 1)});
     }
 
-    template <typename Scalar>
-    inline WorldPoints<Scalar> Camera<Scalar>::pixelsToWorldPoints(const CameraPoints<Scalar> &pIs, Scalar distance) const
+    Point3 Camera::transform_2d_to_3d(Point2 p, RealType distance) const
     {
-        WorldPoints<Scalar> newPIs = WorldPoints<Scalar>::Ones(3, pIs.cols());
-        newPIs.topRows(2) = pIs;
-        return R * ((Ainv * newPIs) * distance) + t;
+        Point3 new_PI = torch::ones({3, 1}, torch::dtype(torch::kDouble));
+        std::cout << "new_PI" << new_PI << std::endl;
+        std::cout << "p" << p << std::endl;
+        std::cout << "new_PI.index({Slice(0, 2), Slice(0, 1)})" << new_PI.index({Slice(0, 2), Slice(0, 1)}) << std::endl;
+        new_PI.index({Slice(0, 2), Slice(0, 1)}) = p;
+        return R.mm(((Ainv.mm(new_PI)) * distance)) + t;
     }
+}
 
-    template <typename Scalar>
-    inline WorldPoints<Scalar> Camera<Scalar>::pixelsToWorldPoints(const CameraPoints<Scalar> &pIs) const
-    {
-        return pixelsToWorldPoints(pIs, distance);
-    }
-
-    template <typename Scalar>
-    inline CameraPoints<Scalar> Camera<Scalar>::project(const WorldPoints<Scalar> &PWs) const
-    {
-        return (A * toCameraCoordinates(PWs).colwise().hnormalized().colwise().homogeneous()).topRows(2);
-    }
-
-    template <typename Scalar>
-    inline void Camera<Scalar>::projectSingle(const WorldPoint<Scalar> &PW, CameraPoint<Scalar> &dest) const
-    {
-        dest << (A * (RT * (PW - t) + limiter).hnormalized().homogeneous()).head(2);
-    }
-
-    template <typename Scalar>
-    inline CameraPoint<Scalar> Camera<Scalar>::projectSingle(const WorldPoint<Scalar> &PW) const
-    {
-        CameraPoint<Scalar> dest;
-        projectSingle(PW, dest);
-        return dest;
-    }
-
-    template <typename Scalar>
-    inline void Camera<Scalar>::projectGrad(const WorldPoint<Scalar> &PW, CameraPointGrad<Scalar> &dest)
-    {
-        tempPC << RT * (PW - t) + limiter;
-        tempDP << (1.0 / tempPC[2]), 0, (-tempPC[0] / (tempPC[2] * tempPC[2])),
-            0.0, (1.0 / tempPC[2]), (-tempPC[1] / (tempPC[2] * tempPC[2])),
-            0.0, 0.0, 0.0;
-
-        dest << (A * tempDP * RT).topRows(2);
-    }
-
-    template <typename Scalar>
-    inline CameraPointGrad<Scalar> Camera<Scalar>::projectGrad(const WorldPoint<Scalar> &PW)
-    {
-        CameraPointGrad<Scalar> dest;
-        projectGrad(PW, dest);
-        return dest;
-    }
-
-    template <typename Scalar>
-    inline void Camera<Scalar>::transformWorldCenter(const ExtrinsicMatrix<Scalar> &P)
-    {
-        this->P = P * this->P;
-        setCalibration(A, d, this->P, height, width);
-    }
-
-    template <typename Scalar>
-    inline bool Camera<Scalar>::isPointInFrame(const CameraPoint<Scalar> &pI) const {
-        return pI[0] >= 0 && pI[0] <= width && pI[1] >= 0 && pI[1] <= height;
-    }
-};
 #endif

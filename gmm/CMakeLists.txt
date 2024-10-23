@@ -7,8 +7,9 @@ project(pybind_gmm)
 set(CMAKE_PREFIX_PATH "./lib/libtorch/")
 find_package(Torch REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Setting Release as the type of build." FORCE)
@@ -29,7 +30,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in ${CMAKE_SOURCE_DIR}/include
 
 if(MSVC)
     add_compile_options(
-        /std:c++17
+        /std:c++20
         $<$<CONFIG:RELWITHDEBINFO>:/O2>
         $<$<CONFIG:DEBUG>:/Od>
     )
@@ -112,7 +113,7 @@ endif(CREATE_BINDINGS)
 if(CREATE_MAIN)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
     add_executable(main src/main.cpp)
-    target_link_libraries(main PRIVATE Eigen3::Eigen)
+    target_link_libraries(main PRIVATE Eigen3::Eigen "${TORCH_LIBRARIES}")
 endif(CREATE_MAIN)
 
 if(CREATE_TESTS)

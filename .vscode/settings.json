@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "alignedvector3": "cpp",
+        "valarray": "cpp"
     }
 }

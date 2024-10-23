@@ -7,3 +7,5 @@ Testing/
 lib/
 test/cpp/lib/
 CMakeSettings.json
+include_old/
+test_old/

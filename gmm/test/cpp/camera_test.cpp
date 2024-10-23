@@ -1,248 +1,189 @@
+#include <iomanip> // For std::setprecision
+#include <gtest/gtest.h>
+
 #include "mc3d_common.h"
 #include "camera.h"
-#include <gtest/gtest.h>
-#include <Eigen/Dense>
 
-using namespace MC3D_TRECSIM;
+using namespace mc3d;
 
 TEST(Camera, Construct)
 {
-    Camera<double> camera("camera_0");
+    Camera camera("camera_0");
     ASSERT_TRUE(camera.id.compare("camera_0") == 0);
 }
 
-TEST(Camera, SetCalibration)
+TEST(Camera, Calibrate)
 {
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    DistortionVector<double> d;
-    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    Tensor A = torch::tensor({
+        {1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02},
+        {0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02},
+        {0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00}});
+    Tensor d = torch::tensor({-4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02});
+    
+    Tensor P = torch::tensor({
+        { 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02 },
+        { 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02 },
+        { -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02 },
+        { 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00 }
+    });
+
     unsigned int height = 1280;
     unsigned int width = 1920;
     
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
+    Camera camera("camera_0");
+    camera.calibrate(A, d, P, height, width);
 
-    RotationMatrix<double> expectedR;
-    expectedR << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01;
-    RotationMatrix<double> expectedRT;
-    expectedRT << 4.894621227523461293e-01, 4.786322175197727513e-01, -7.289293729456041149e-01, -4.552116929303474668e-01, 8.532140054413278607e-01, 2.545744989944053183e-01, 7.437803069524321353e-01, 2.072125992088085233e-01, 6.354949202935263886e-01;
-    TranslationVector<double> expectedt;
-    expectedt << -3.875108756319725103e+02, -1.292527896409998505e+02, 1.774314430787018466e+02;
+    Tensor expected_R = torch::tensor({
+        {4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01},
+        {4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01},
+        {-7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01}
+    });
 
-    ASSERT_TRUE(camera.A.isApprox(A));
-    ASSERT_TRUE(camera.d.isApprox(d));
-    ASSERT_TRUE(camera.P.isApprox(P));
+    Tensor expected_R_T = torch::tensor({
+        {4.894621227523461293e-01, 4.786322175197727513e-01, -7.289293729456041149e-01},
+        {-4.552116929303474668e-01, 8.532140054413278607e-01, 2.545744989944053183e-01},
+        {7.437803069524321353e-01, 2.072125992088085233e-01, 6.354949202935263886e-01}});
+
+    Tensor expected_t = torch::tensor({
+        { -3.875108756319725103e+02 },
+        { -1.292527896409998505e+02 },
+        { 1.774314430787018466e+02 }});
+
+    std::cout << camera.t << std::endl;
+    std::cout << expected_t << std::endl;
+
+    ASSERT_TRUE(torch::equal(camera.A, A));
+    ASSERT_TRUE(torch::equal(camera.d, d));
+    ASSERT_TRUE(torch::equal(camera.P, P));
     ASSERT_TRUE(camera.height == height);
     ASSERT_TRUE(camera.width == width);
-    ASSERT_TRUE(camera.R.isApprox(expectedR));
-    ASSERT_TRUE(camera.RT.isApprox(expectedRT));
-    ASSERT_TRUE(camera.t.isApprox(expectedt));
+    ASSERT_TRUE(torch::equal(camera.R, expected_R));
+    ASSERT_TRUE(torch::equal(camera.RT, expected_R_T));
+    ASSERT_TRUE(torch::equal(camera.t, expected_t));
 }
 
-TEST(Camera, ToCameraCoordinates)
+TEST(Camera, Transform3Dto2D)
 {
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    DistortionVector<double> d;
-    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    std::cout << std::fixed << std::setprecision(12);
+    Tensor A = torch::tensor({{1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02},
+                              {0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02},
+                              {0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00}},
+                             torch::dtype(torch::kDouble));
+
+    Tensor d = torch::tensor({-4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02}, torch::dtype(torch::kDouble));
+
+    Tensor P = torch::tensor({{4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02},
+                              {4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02},
+                              {-7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02},
+                              {0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00}},
+                             torch::dtype(torch::kDouble));
+
     unsigned int height = 1280;
     unsigned int width = 1920;
 
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
+    Camera camera("camera_0");
+    camera.calibrate(A, d, P, height, width);
 
-    WorldPoints<double> PWs(3, 1);
-    PWs << 100, -200, 150;
-
-    WorldPoints<double> PCs = camera.toCameraCoordinates(PWs);
-
-    WorldPoints<double> expectedPCs(3, 1);
-    expectedPCs << 2.247517984765653694e+02, -2.892665076210431039e+02, 3.305087326421007106e+02;
-
-    EXPECT_TRUE(PCs.isApprox(expectedPCs));
-}
-
-TEST(Camera, ToCameraCoordinatesSinglePoint)
-{
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    DistortionVector<double> d;
-    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    unsigned int height = 1280;
-    unsigned int width = 1920;
-
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
-
-    WorldPoint<double> PW(3);
-    PW << 100, -200, 150;
-
-    WorldPoint<double> PC = camera.toCameraCoordinates(PW);
-
-    WorldPoint<double> expectedPC(3);
-    expectedPC << 2.247517984765653694e+02, -2.892665076210431039e+02, 3.305087326421007106e+02;
-
-    EXPECT_TRUE(PC.isApprox(expectedPC));
-}
-
-TEST(Camera, Project)
-{
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    DistortionVector<double> d;
-    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    unsigned int height = 1280;
-    unsigned int width = 1920;
-
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
-
-    WorldPoints<double> PWs(3, 1);
-    PWs << 100, -200, 150;
-
-    std::cout << PWs << std::endl;
-
-    CameraPoints<double> ps = camera.project(PWs);
-
-    CameraPoints<double> expectedps(2, 1);
-    expectedps << 1.699573690735038781e+03, -4.083944520518871286e+02;
-
-    EXPECT_TRUE(ps.isApprox(expectedps));
-}
-
-TEST(Camera, ProjectGrad)
-{
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    DistortionVector<double> d;
-    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
-    unsigned int height = 1280;
-    unsigned int width = 1920;
-
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
-
-    WorldPoint<double> PW;
-    PW << 100, -200, 150;
+    Point3 PW = torch::tensor({100.0, -200.0, 150.0}, torch::dtype(torch::kDouble)).reshape({3, 1});
 
     std::cout << PW << std::endl;
 
-    CameraPointGrad<double> pGrad = camera.projectGrad(PW);
+    Point2 p = camera.transform_3d_to_2d(PW);
 
-    CameraPointGrad<double> expectedpGrad(2, 3);
-    expectedpGrad << -5.619072862381639666e-02, 1.162684432384638367e+00, -3.997247651837172455e+00, 6.739469736839276415e-01, 3.561795023615820899e+00, 2.791301108698526434e+00;
+    Point2 expected_p = torch::tensor({1699.573690735038781, -408.394452051887129}, torch::dtype(torch::kDouble)).reshape({2, 1});
 
-    EXPECT_TRUE(pGrad.isApprox(expectedpGrad));
+    std::cout << "p: " << p << std::endl;
+    std::cout << "expected_p: " << expected_p << std::endl;
+
+    EXPECT_TRUE(torch::equal(p, expected_p));
 }
 
-TEST(Camera, pixelsToWorldPoints)
+TEST(Camera, Transform3Dto2DGrad)
 {
-    IntrinsicMatrix<double> A;
-    A << 1.123478282832530e+03, 0.0, 9.624201914371442e+02, 0.0, 1.115995046593397e+03, 5.875233741561747e+02, 0.0, 0.0, 1.0;
-    DistortionVector<double> d;
-    d << -4.098335442199602e-01, 2.065881602949584e-01, -1.852675935335392e-03, -1.274891630199873e-04, -6.102605512197318e-02;
-    ExtrinsicMatrix<double> P;
-    P << 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+    Tensor A = torch::tensor({{1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02},
+                              {0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02},
+                              {0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00}},
+                             torch::dtype(torch::kDouble));
+
+    Tensor d = torch::tensor({-4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02}, torch::dtype(torch::kDouble));
+
+    Tensor P = torch::tensor({{4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+02},
+                              {4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+02},
+                              {-7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+02},
+                              {0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00}},
+                             torch::dtype(torch::kDouble));
+
+    unsigned int height = 1280;
+    unsigned int width = 1920;
+
+    Camera camera("camera_0");
+    camera.calibrate(A, d, P, height, width);
+
+    Point3 PW = torch::tensor({
+        {100},
+        {-200},
+        {150}
+    }, torch::dtype(torch::kDouble).requires_grad(true));
+
+    Point2 p = camera.transform_3d_to_2d(PW);
+
+    p[0][0].backward({}, c10::optional<bool>(true), true);
+
+    Tensor grad_0 = torch::clone(PW.grad());
+
+    PW.grad().zero_();
+
+    p[1][0].backward({}, c10::optional<bool>(true), true);
+    Tensor grad_1 = PW.grad();
+    
+    std::cout << "grad_0: " << grad_0 << std::endl;
+    std::cout << "grad_1: " << grad_1 << std::endl;
+
+    Tensor p_grad = torch::cat({grad_0, grad_1}, 1).transpose(0, 1);
+
+    Tensor expected_p_grad = torch::tensor({{-5.619072862381639666e-02, 1.162684432384638367e+00, -3.997247651837172455e+00},
+                                            {6.739469736839276415e-01, 3.561795023615820899e+00, 2.791301108698526434e+00}},
+                                           torch::dtype(torch::kDouble));
+
+    std::cout << "p_grad: " << p_grad << std::endl;
+    std::cout << "expected_p_grad: " << expected_p_grad << std::endl;
+
+    EXPECT_TRUE(torch::equal(p_grad, expected_p_grad));
+}
+
+TEST(Camera, Transform2DTo3DOffcenterCamera)
+{
+    Tensor A = torch::tensor({{1.137844469366448e+03, 0.0, 9.258192763436688e+02},
+                              {0.0, 1.137868503272386e+03, 5.874861875982957e+02},
+                              {0.0, 0.0, 1.0}},
+                             torch::dtype(torch::kDouble));
+
+    Tensor d = torch::tensor({-0.412249092780437, 0.199542410768437, -0.000678018339625, 0.00145706193774, -0.052644886162199});
+
+    Tensor P = torch::tensor({{4.894621227523461e-01, -4.552116929303475e-01, 7.437803069524321e-01, -3.875108756319725e+02},
+                              {4.786322175197728e-01, 8.532140054413279e-01, 2.072125992088085e-01, -1.292527896409999e+02},
+                              {-7.289293729456041e-01, 2.545744989944053e-01, 6.354949202935264e-01, 1.774314430787018e+02},
+                              {0.0, 0.0, 0.0, 1.0}},
+                             torch::dtype(torch::kDouble));
+
     unsigned int height = 1080;
     unsigned int width = 1920;
 
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
+    Camera camera("camera_0");
+    camera.calibrate(A, d, P, height, width);
 
-    CameraPoints<double> pIs(2, 1);
-    pIs << 1920.0/2.0, 1080.0/2.0;
+    Point2 p = torch::tensor({1920.0 / 2.0, 1080.0 / 2.0}, torch::dtype(torch::kDouble)).reshape({2, 1});
 
-    std::cout << "pIs: " << pIs << std::endl;
+    std::cout << "p: " << p << std::endl;
 
-    WorldPoints<double> PWs = camera.pixelsToWorldPoints(pIs, 400.0);
+    Point3 PW = camera.transform_2d_to_3d(p, 400.0);
 
-    WorldPoints<double> expectedPWs(3, 1);
-    expectedPWs << -0.8616780490112, -17.033543043489672, 400.0;
+    Point3 expected_PW = torch::tensor({-76.51853411744713, -54.85925460266873, 418.6210074863151},
+                                       torch::dtype(torch::kDouble))
+                             .reshape({3, 1});
 
-    std::cout << "PWs: " << PWs << std::endl;
-    std::cout << "expectedPWs: " << expectedPWs << std::endl;
+    std::cout << "PWs: " << PW << std::endl;
+    std::cout << "expectedPWs: " << expected_PW << std::endl;
 
-    EXPECT_TRUE(PWs.isApprox(expectedPWs));
-}
-
-TEST(Camera, pixelsToWorldPointsOffcenterCamera)
-{
-    IntrinsicMatrix<double> A;
-    A << 1.137844469366448e+03, 0.0, 9.258192763436688e+02, 0.0, 1.137868503272386e+03, 5.874861875982957e+02, 0.0, 0.0, 1.0;
-    DistortionVector<double> d;
-    d << -0.412249092780437, 0.199542410768437, -0.000678018339625, 0.00145706193774, -0.052644886162199;
-    ExtrinsicMatrix<double> P;
-    P << 4.894621227523461e-01, -4.552116929303475e-01, 7.437803069524321e-01, -3.875108756319725e+02,
-        4.786322175197728e-01, 8.532140054413279e-01, 2.072125992088085e-01, -1.292527896409999e+02,
-        -7.289293729456041e-01, 2.545744989944053e-01, 6.354949202935264e-01, 1.774314430787018e+02,
-        0.0, 0.0, 0.0, 1.0;
-    unsigned int height = 1080;
-    unsigned int width = 1920;
-
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
-
-    CameraPoints<double> pIs(2, 1);
-    pIs << 1920.0 / 2.0, 1080.0 / 2.0;
-
-    std::cout << "pIs: " << pIs << std::endl;
-
-    WorldPoints<double> PWs = camera.pixelsToWorldPoints(pIs, 400.0);
-
-    WorldPoints<double> expectedPWs(3, 1);
-    expectedPWs << -76.51853411744713, -54.85925460266873, 418.6210074863151;
-
-    std::cout << "PWs: " << PWs << std::endl;
-    std::cout << "expectedPWs: " << expectedPWs << std::endl;
-
-    EXPECT_TRUE(PWs.isApprox(expectedPWs));
-}
-
-TEST(Camera, isPointInFrame)
-{
-    IntrinsicMatrix<double> A;
-    A << 1.123478282832530e+03, 0.0, 9.624201914371442e+02, 0.0, 1.115995046593397e+03, 5.875233741561747e+02, 0.0, 0.0, 1.0;
-    DistortionVector<double> d;
-    d << -4.098335442199602e-01, 2.065881602949584e-01, -1.852675935335392e-03, -1.274891630199873e-04, -6.102605512197318e-02;
-    ExtrinsicMatrix<double> P;
-    P << 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-    unsigned int height = 1080;
-    unsigned int width = 1920;
-
-    Camera<double> camera("camera_0");
-    camera.setCalibration(A, d, P, height, width);
-
-    CameraPoint<double> pI(2);
-
-    pI << 0, 0;
-    ASSERT_TRUE(camera.isPointInFrame(pI));
-    pI << 0, 1080.0;
-    ASSERT_TRUE(camera.isPointInFrame(pI));
-    pI << 1920.0, 0;
-    ASSERT_TRUE(camera.isPointInFrame(pI));
-    pI << 1920.0, 1080.0;
-    ASSERT_TRUE(camera.isPointInFrame(pI));
-    pI << 1920.0 / 2.0, 1080.0 / 2.0;
-    ASSERT_TRUE(camera.isPointInFrame(pI));
-    pI << -1, 0;
-    ASSERT_FALSE(camera.isPointInFrame(pI));
-    pI << 0, -1;
-    ASSERT_FALSE(camera.isPointInFrame(pI));
-    pI << 1921.0, 0;
-    ASSERT_FALSE(camera.isPointInFrame(pI));
-    pI << 0, 1081.0;
-    ASSERT_FALSE(camera.isPointInFrame(pI));
-    pI << 1921.0, 1081.0;
-    ASSERT_FALSE(camera.isPointInFrame(pI));
+    EXPECT_TRUE(torch::equal(PW, expected_PW));
 }
