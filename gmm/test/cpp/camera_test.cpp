@@ -51,14 +51,14 @@ TEST(Camera, Calibrate)
     std::cout << camera.t << std::endl;
     std::cout << expected_t << std::endl;
 
-    ASSERT_TRUE(torch::equal(camera.A, A));
-    ASSERT_TRUE(torch::equal(camera.d, d));
-    ASSERT_TRUE(torch::equal(camera.P, P));
+    ASSERT_TRUE(camera.A.allclose(A));
+    ASSERT_TRUE(camera.d.allclose(d));
+    ASSERT_TRUE(camera.P.allclose(P));
     ASSERT_TRUE(camera.height == height);
     ASSERT_TRUE(camera.width == width);
-    ASSERT_TRUE(torch::equal(camera.R, expected_R));
-    ASSERT_TRUE(torch::equal(camera.RT, expected_R_T));
-    ASSERT_TRUE(torch::equal(camera.t, expected_t));
+    ASSERT_TRUE(camera.R.allclose(expected_R));
+    ASSERT_TRUE(camera.RT.allclose(expected_R_T));
+    ASSERT_TRUE(camera.t.allclose(expected_t));
 }
 
 TEST(Camera, Transform3Dto2D)
@@ -94,7 +94,7 @@ TEST(Camera, Transform3Dto2D)
     std::cout << "p: " << p << std::endl;
     std::cout << "expected_p: " << expected_p << std::endl;
 
-    EXPECT_TRUE(torch::equal(p, expected_p));
+    EXPECT_TRUE(p.allclose(expected_p));
 }
 
 TEST(Camera, Transform3Dto2DGrad)
@@ -147,7 +147,7 @@ TEST(Camera, Transform3Dto2DGrad)
     std::cout << "p_grad: " << p_grad << std::endl;
     std::cout << "expected_p_grad: " << expected_p_grad << std::endl;
 
-    EXPECT_TRUE(torch::equal(p_grad, expected_p_grad));
+    EXPECT_TRUE(p_grad.allclose(expected_p_grad));
 }
 
 TEST(Camera, Transform2DTo3DOffcenterCamera)
@@ -184,5 +184,5 @@ TEST(Camera, Transform2DTo3DOffcenterCamera)
     std::cout << "PWs: " << PW << std::endl;
     std::cout << "expectedPWs: " << expected_PW << std::endl;
 
-    EXPECT_TRUE(torch::equal(PW, expected_PW));
+    EXPECT_TRUE(PW.allclose(expected_PW));
 }

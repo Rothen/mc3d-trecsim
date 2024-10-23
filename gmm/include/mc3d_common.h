@@ -3,6 +3,8 @@
 
 #include <torch/torch.h>
 
+#include "config.h"
+
 using namespace torch::autograd;
 using std::array;
 using std::vector;
