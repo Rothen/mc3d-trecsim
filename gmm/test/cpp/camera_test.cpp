@@ -1,4 +1,3 @@
-#include <iomanip> // For std::setprecision
 #include <gtest/gtest.h>
 
 #include "mc3d_common.h"
