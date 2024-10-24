@@ -45,7 +45,7 @@ namespace mc3d
         std::tie(Q, R) = torch::linalg_qr(covariance);
 
         covariance_inf = -0.5 * R.inverse().mm(Q.transpose(0, 1));
-        k = torch::tensor({RealType(nComponents)});
+        k = torch::tensor({RealType(nComponents)}, TensorRealTypeOption);
         det = covariance.det();
         factor = det.pow(-0.5) * pow(2 * M_PI, -static_cast<RealType>(nComponents) / 2);
         log_factor = factor.log();
@@ -66,7 +66,7 @@ namespace mc3d
     template <int nComponents>
     inline Tensor MultivariateNormal<nComponents>::pdf(const Tensor x, const Tensor mean) const
     {
-        return factor.mm((x - mean).transpose(0, 1).mm(covariance_inf).mm(x - mean).exp());
+        return factor * (x - mean).transpose(0, 1).mm(covariance_inf).mm(x - mean).exp();
     }
 
     template <int nComponents>

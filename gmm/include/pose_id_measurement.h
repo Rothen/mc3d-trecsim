@@ -25,4 +25,6 @@ namespace mc3d
     };
 }
 
+#include "pose_id_measurement_impl.h"
+
 #endif

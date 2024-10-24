@@ -23,8 +23,12 @@ namespace mc3d
         Tensor scale_limb_length_log_prior() const;
 
     protected:
-        Tensor spline_parameter;//spline_parameter.sizes() == {pose_parameter.nb_keypoints,nb_spline_parameter,3} requires_grad
+        SplineWindow &spline;
+        const PoseParameter& pose_parameter;
+        Tensor spline_parameter; // spline_parameter.sizes() == {pose_parameter.nb_keypoints,nb_spline_parameter,3} requires_grad
     };
 }
+
+#include "person_hypothesis_impl.h"
 
 #endif

@@ -3,7 +3,8 @@
 
 #include "pose_id_measurement.h"
 
-namespace mc3d{
+namespace mc3d
+{
     PoseIdMeasurement::PoseIdMeasurement(RealType prec_variance) : log_normalization{log(2 * pi * prec_variance)}
     { }
 

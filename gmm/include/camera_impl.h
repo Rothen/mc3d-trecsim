@@ -35,7 +35,7 @@ namespace mc3d
 
     Point3 Camera::transform_2d_to_3d(Point2 p, RealType distance) const
     {
-        Point3 new_PI = torch::ones({3, 1}, torch::dtype(torch::kDouble));
+        Point3 new_PI = torch::ones({3, 1}, TensorRealTypeOption);
         std::cout << "new_PI" << new_PI << std::endl;
         std::cout << "p" << p << std::endl;
         std::cout << "new_PI.index({Slice(0, 2), Slice(0, 1)})" << new_PI.index({Slice(0, 2), Slice(0, 1)}) << std::endl;

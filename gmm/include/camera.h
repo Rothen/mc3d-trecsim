@@ -12,19 +12,19 @@ namespace mc3d
         unsigned int height;
         unsigned int width;
         RealType distance;
-        // Intrinsic camera matrix
+        // Intrinsic camera matrix \in R^{3x3}
         Tensor A;
-        // Intrinsic camera matrix
+        // Intrinsic camera matrix \in R^{3x3}
         Tensor Ainv;
-        // Camera distortion vector
+        // Camera distortion vector \in R^{5}
         Tensor d;
-        // Extrinsic camera matrix
+        // Extrinsic camera matrix \in R^{4x4}
         Tensor P;
-        // Rotation matrix part of the extrinsic matrix
+        // Rotation matrix part of the extrinsic matrix \in R^{3x3}
         Tensor R;
-        // Transpose of the rotation matrix (also the inverse)
+        // Transpose of the rotation matrix (also the inverse) \in R^{3x3}
         Tensor RT;
-        // Translation vector part of the extrinsic matrix
+        // Translation vector part of the extrinsic matrix \in R^{3x1}
         Tensor t;
 
         Camera(std::string id = "", Tensor A = torch::eye(3), Tensor d = torch::zeros(5), Tensor P = torch::eye(4), unsigned int height = 0, unsigned int width = 0, RealType distance = 1.0);

@@ -12,6 +12,7 @@ using torch::Tensor;
 using torch::kDouble;
 
 using RealType = double;
+torch::TensorOptions TensorRealTypeOption = torch::dtype(torch::kDouble);
 using Point3 = Tensor; // Tensor.sizes() == {3,1}
 using Point2 = Tensor; // Tensor.sizes() == {2,1}
 
