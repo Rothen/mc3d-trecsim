@@ -12,19 +12,23 @@ namespace mc3d
     public:
         // 3D Spline: D -> R^3
         size_t nb_spline_parameter;
-        
-        SplineWindow(int degree = 3);
+
+        SplineWindow(Tensor knots, size_t degree = 3);
         void prepare_time_projection(RealType time_delta_forward);
         SplineParameter project_forward_spline_parameter(SplineParameter spline_parameter); // shift forward according to time_delta_forward
         Point3 evaluate(RealType time, SplineParameter spline_parameter); // use design_matrix
         Tensor spline_smoothness_log_prior(SplineParameter spline_parameter); // val tensor, no grad
     protected:
-        int degree;
-        int nb_basis;
+        size_t degree;
+        size_t nb_basis;
+        Tensor knots;
 
-        RealType basis(RealType t, int i, int k);  // according to Cox DeBoor
+        inline RealType basis(RealType t, int i, int k); // according to Cox DeBoor
         Tensor design_matrix(RealType time_point); // no grad
+        Tensor design_matrix(Tensor time_points); // no grad
     };
 }
+
+#include "spline_window_impl.h"
 
 #endif

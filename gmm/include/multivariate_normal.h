@@ -11,11 +11,10 @@
 
 namespace mc3d
 {
-    template <int nComponents>
     class MultivariateNormal
     {
     public:
-        MultivariateNormal(Tensor mean = torch::zeros({nComponents, nComponents}), Tensor covariance = torch::eye(nComponents));
+        MultivariateNormal(Tensor mean = torch::zeros({1, 1}), Tensor covariance = torch::eye(1));
 
         inline void set_mean(Tensor mean);
 
@@ -40,7 +39,7 @@ namespace mc3d
         Tensor covariance;
         Tensor covariance_inf;
         Tensor det;
-        Tensor k;
+        RealType k;
         Tensor factor;
         Tensor log_factor;
     };
