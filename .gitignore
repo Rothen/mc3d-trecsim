@@ -35,3 +35,5 @@ leitner_calibrations/
 leitner_calibrations.zip
 
 # End of https://www.gitignore.io/api/visualstudiocode
+
+testing/
