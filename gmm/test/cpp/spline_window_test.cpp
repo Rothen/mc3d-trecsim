@@ -8,7 +8,7 @@ using namespace mc3d;
 class SplineWindowTest : public SplineWindow
 {
 public:
-    SplineWindowTest(Tensor knots, size_t degree) : SplineWindow(knots, degree) {}
+    SplineWindowTest(Tensor knots, size_t degree = 3, RealType lambda = 0) : SplineWindow(knots, degree, lambda) {}
 
     RealType basis(RealType t, int i, int k)
     {
@@ -83,33 +83,31 @@ TEST(SplineWindow, DesignMatrixSameKnots)
     }
 }
 
-/*TEST(SplineWindow, DesignMatrixUniformKnots)
+TEST(SplineWindow, SplineSmoothnessLogPrior)
 {
-    Tensor knots = torch::tensor({1, 2, 3}, TensorRealTypeOption.requires_grad(false));
+    Tensor knots = torch::linspace(0.0, 1.0, 10, TensorRealTypeOption.requires_grad(false));
+    int degree = 3;
 
-    SplineWindowTest spline(knots, 3);
+    SplineWindowTest spline(knots, degree, 1e-2);
+    SplineParameter spline_parameter = torch::rand({spline.get_knots().size(0) - degree, 3}, TensorRealTypeOption.requires_grad(true));
 
-    Tensor times = torch::linspace(1.0, 3.0, 10, TensorRealTypeOption.requires_grad(false));
+    std::cout << "nb_basis: " << spline.get_nb_basis() << std::endl;
+    Tensor r_spline_smoothness_log_prior = spline.spline_smoothness_log_prior(spline_parameter);
+    Tensor expected_spline_smoothness_log_prior = torch::tensor({
+        {0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27}
+    }, TensorRealTypeOption.requires_grad(false));
 
-    Tensor expected_design_matrix = torch::tensor({
-            {1.666666666666666574e-01, 6.666666666666666297e-01, 1.666666666666666574e-01, 0.000000000000000000e+00, 0.000000000000000000e+00},
-            {7.841792409693641719e-02, 6.227709190672153783e-01, 2.969821673525377959e-01, 1.828989483310473506e-03, 0.000000000000000000e+00},
-            {2.857796067672611559e-02, 5.130315500685871388e-01, 4.437585733882029593e-01, 1.463191586648376549e-02, 0.000000000000000000e+00},
-            {6.172839506172847837e-03, 3.703703703703705163e-01, 5.740740740740739589e-01, 4.938271604938268555e-02, 0.000000000000000000e+00},
-            {2.286236854138091882e-04, 2.277091906721536718e-01, 6.550068587105624118e-01, 1.170553269318701239e-01, 0.000000000000000000e+00},
-            {0.000000000000000000e+00, 1.170553269318701239e-01, 6.550068587105624118e-01, 2.277091906721536718e-01, 2.286236854138091882e-04},
-            {0.000000000000000000e+00, 4.938271604938278270e-02, 5.740740740740741810e-01, 3.703703703703701278e-01, 6.172839506172822684e-03},
-            {0.000000000000000000e+00, 1.463191586648378804e-02, 4.437585733882031258e-01, 5.130315500685870278e-01, 2.857796067672607743e-02},
-            {0.000000000000000000e+00, 1.828989483310473506e-03, 2.969821673525377959e-01, 6.227709190672153783e-01, 7.841792409693641719e-02},
-            {0.000000000000000000e+00, 0.000000000000000000e+00, 1.666666666666666574e-01, 6.666666666666666297e-01, 1.666666666666666574e-01}
-        },
-        TensorRealTypeOption.requires_grad(false));
+    std::cout << "r_spline_smoothness_log_prior: " << r_spline_smoothness_log_prior << std::endl;
+    std::cout << "expected_spline_smoothness_log_prior: " << expected_spline_smoothness_log_prior << std::endl;
 
-    for (int i = 0; i < times.size(0); i++)
-    {
-        auto design_matrix = spline.design_matrix(times[i].item().to<RealType>());
-        std::cout << "Design matrix: " << design_matrix << std::endl;
-        std::cout << "Expected design matrix: " << expected_design_matrix[i] << std::endl;
-        ASSERT_TRUE(design_matrix.allclose(expected_design_matrix[i]));
-    }
-}*/
+    ASSERT_TRUE(r_spline_smoothness_log_prior.allclose(expected_spline_smoothness_log_prior));
+}

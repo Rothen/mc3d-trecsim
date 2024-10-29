@@ -13,7 +13,7 @@ namespace mc3d
         // 3D Spline: D -> R^3
         size_t nb_spline_parameter;
 
-        SplineWindow(Tensor knots, size_t degree = 3);
+        SplineWindow(Tensor knots, size_t degree = 3, RealType lambda = 0);
         void prepare_time_projection(RealType time_delta_forward);
         SplineParameter project_forward_spline_parameter(SplineParameter spline_parameter); // shift forward according to time_delta_forward
         Point3 evaluate(RealType time, SplineParameter spline_parameter); // use design_matrix
@@ -22,8 +22,10 @@ namespace mc3d
         size_t degree;
         size_t nb_basis;
         Tensor knots;
+        RealType lambda;
 
         inline RealType basis(RealType t, int i, int k); // according to Cox DeBoor
+        inline RealType basis_int(const int j, const int k);
         Tensor design_matrix(RealType time_point); // no grad
         Tensor design_matrix(Tensor time_points); // no grad
     };

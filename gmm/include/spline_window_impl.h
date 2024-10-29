@@ -5,7 +5,7 @@
 
 namespace mc3d
 {
-    SplineWindow::SplineWindow(Tensor knots, size_t degree) : degree(degree), knots(knots)
+    SplineWindow::SplineWindow(Tensor knots, size_t degree, RealType lambda) : degree(degree), knots(knots), lambda(lambda)
     {
         for (int i = 0; i < degree; i++)
         {
@@ -35,7 +35,36 @@ namespace mc3d
     // val tensor, no grad
     Tensor SplineWindow::spline_smoothness_log_prior(SplineParameter spline_parameter)
     {
+        Tensor r_spline_smoothness_log_prior = torch::zeros({static_cast<long>(nb_basis) - 2, spline_parameter.size(0)},
+            TensorRealTypeOption.requires_grad(false));
 
+        RealType N;
+        RealType s;
+        RealType d_j;
+        RealType b0;
+        RealType b2;
+        RealType b1;
+        RealType r_degree = static_cast<RealType>(degree);
+
+        for (int j = 2; j < nb_basis; j++)
+        {
+            /*auto basisFunc = [&](RealType t)
+            {
+                return basis(t, j, degree - 2);
+            };*/
+            N = basis_int(j, degree - 2);
+            s = std::sqrt(N);
+            d_j = (r_degree - 1.0) * (r_degree - 2.0) * s / (knots[j + degree - 2] - knots[j]).item().to<RealType>();
+            b0 = d_j / (knots[j + degree - 2] - knots[j - 1]).item().to<RealType>();
+            b2 = d_j / (knots[j + degree - 1] - knots[j]).item().to<RealType>();
+            b1 = -(b0 + b2);
+            r_spline_smoothness_log_prior[j - 2][j - 2] = lambda * b0;
+            r_spline_smoothness_log_prior[j - 2][j - 1] = lambda * b1;
+            r_spline_smoothness_log_prior[j - 2][j - 0] = lambda * b2;
+            std::cout << "r_spline_smoothness_log_prior: " << r_spline_smoothness_log_prior << std::endl;
+        }
+
+        return r_spline_smoothness_log_prior;
     }
 
     // according to Cox DeBoor
@@ -53,6 +82,19 @@ namespace mc3d
         RealType term2 = (denom2 != 0) ? (knots[i + k + 1].item().to<RealType>() - t) / denom2 * basis(t, i + 1, k - 1) : 0;
 
         return term1 + term2;
+    }
+
+    inline RealType SplineWindow::basis_int(const int j, const int k)
+    {
+        /*Scalar h{(knots[knots.size() - 1] - knots[0]) / 100};
+        Scalar integral{0.5 * (basis(knots[0], j, k) + basis(knots[knots.size() - 1], j, k))};
+        for (int i = 1; i < 100; ++i)
+        {
+            integral += basis(knots[0] + i * h, j, k);
+        }
+        integral *= h;
+        return integral;*/
+        return (knots[j + k + 1] - knots[j]).item().to<RealType>() / (static_cast<RealType>(k) + 1.0);
     }
 
     Tensor SplineWindow::design_matrix(RealType time_point)

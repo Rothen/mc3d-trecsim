@@ -17,26 +17,31 @@ namespace mc3d
         }, TensorRealTypeOption.requires_grad(true));
     }
 
+    // sum all priors
     Tensor PersonHypothesis::parameter_log_prior() const
     {
 
     }
 
+    // use  spline.evaluate with slice of spline_parameter and cam.transform
     Tensor PersonHypothesis::predict(size_t limb_id, RealType time, const Camera &camera) const
     {
 
     }
 
+    // use spline project_forward_spline_parameter on slices
     void PersonHypothesis::project_forward_spline_parameter()
     {
         
     }
 
+    // use spline.spline_smoothness_log_prior
     Tensor PersonHypothesis::smoothness_log_prior() const
     {
 
     }
 
+    // use pose_parameter.average_limb_lengths
     Tensor PersonHypothesis::limb_length_log_prior() const
     {
 
