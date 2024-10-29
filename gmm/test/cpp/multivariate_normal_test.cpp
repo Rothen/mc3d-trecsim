@@ -35,13 +35,13 @@ TEST(MultivariateNormal, PDF)
     MultivariateNormal mvn(mean, covariance);
 
     Tensor x = torch::tensor({0.3, 0.7}, TensorRealTypeOption).reshape({2, 1});
-    ASSERT_DOUBLE_EQ(mvn.pdf(x).item().toDouble(), 0.12210461930817082);
+    ASSERT_DOUBLE_EQ(mvn.prob(x).item().toDouble(), 0.12210461930817082);
 
     x = torch::tensor({0.7, 0.3}, TensorRealTypeOption).reshape({2, 1});
-    ASSERT_DOUBLE_EQ(mvn.pdf(x).item().toDouble(), 0.1491389188070974);
+    ASSERT_DOUBLE_EQ(mvn.prob(x).item().toDouble(), 0.1491389188070974);
 
     x = torch::tensor({0.2, 0.5}, TensorRealTypeOption).reshape({2, 1});
-    ASSERT_DOUBLE_EQ(mvn.pdf(x).item().toDouble(), 0.11557020867169786);
+    ASSERT_DOUBLE_EQ(mvn.prob(x).item().toDouble(), 0.11557020867169786);
 }
 
 TEST(MultivariateNormal, PDF3D)
@@ -57,7 +57,7 @@ TEST(MultivariateNormal, PDF3D)
     MultivariateNormal mvn(mean, covariance);
 
     Tensor x = torch::tensor({0.0, 0.0, 0.0}, TensorRealTypeOption).reshape({3, 1});
-    ASSERT_DOUBLE_EQ(mvn.pdf(x).item().toDouble(), 0.06349363593424098);
+    ASSERT_DOUBLE_EQ(mvn.prob(x).item().toDouble(), 0.06349363593424098);
 }
 
 TEST(MultivariateNormal, PDFOfPoints)
@@ -70,5 +70,5 @@ TEST(MultivariateNormal, PDFOfPoints)
 
     double expected_P = 8.144330107692559e-12;
 
-    ASSERT_TRUE(abs(mvn.pdf(x).item().toDouble() - expected_P) < 1e-10);
+    ASSERT_TRUE(abs(mvn.prob(x).item().toDouble() - expected_P) < 1e-10);
 }

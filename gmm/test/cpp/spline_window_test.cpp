@@ -8,7 +8,7 @@ using namespace mc3d;
 class SplineWindowTest : public SplineWindow
 {
 public:
-    SplineWindowTest(Tensor knots, size_t degree = 3, RealType lambda = 0) : SplineWindow(knots, degree, lambda) {}
+    SplineWindowTest(Tensor knots, size_t degree = 3, RealType lambda = 0.0, AugmentationMode augmentation_mode = AugmentationMode::Same) : SplineWindow(knots, degree, lambda, augmentation_mode) {}
 
     RealType basis(RealType t, int i, int k)
     {
@@ -83,31 +83,56 @@ TEST(SplineWindow, DesignMatrixSameKnots)
     }
 }
 
-TEST(SplineWindow, SplineSmoothnessLogPrior)
+TEST(SplineWindow, SplineSmoothnessLogPriorSame)
 {
     Tensor knots = torch::linspace(0.0, 1.0, 10, TensorRealTypeOption.requires_grad(false));
     int degree = 3;
 
     SplineWindowTest spline(knots, degree, 1e-2);
-    SplineParameter spline_parameter = torch::rand({spline.get_knots().size(0) - degree, 3}, TensorRealTypeOption.requires_grad(true));
+    SplineParameter spline_parameter = torch::rand({static_cast<long>(spline.get_nb_basis()), 3}, TensorRealTypeOption.requires_grad(true));
 
-    std::cout << "nb_basis: " << spline.get_nb_basis() << std::endl;
-    Tensor r_spline_smoothness_log_prior = spline.spline_smoothness_log_prior(spline_parameter);
     Tensor expected_spline_smoothness_log_prior = torch::tensor({
-        {0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0.27, -0.54, 0.27}
+        {1.3214, -1.9821,  0.6607, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.4050, -0.6750, 0.2700, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.2202, -0.5506, 0.3303, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.4360, -1.3079, 0.8719}
     }, TensorRealTypeOption.requires_grad(false));
 
-    std::cout << "r_spline_smoothness_log_prior: " << r_spline_smoothness_log_prior << std::endl;
+    std::cout << "r_spline_smoothness_log_prior: " << spline.get_smoothing_design_matrix() << std::endl;
     std::cout << "expected_spline_smoothness_log_prior: " << expected_spline_smoothness_log_prior << std::endl;
 
-    ASSERT_TRUE(r_spline_smoothness_log_prior.allclose(expected_spline_smoothness_log_prior));
+    EXPECT_TRUE(spline.get_smoothing_design_matrix().allclose(expected_spline_smoothness_log_prior, 1e-3));
+}
+
+TEST(SplineWindow, SplineSmoothnessLogPriorUniform)
+{
+    Tensor knots = torch::linspace(0.0, 1.0, 10, TensorRealTypeOption.requires_grad(false));
+    int degree = 3;
+
+    SplineWindowTest spline(knots, degree, 1e-2, AugmentationMode::Uniform);
+    SplineParameter spline_parameter = torch::rand({static_cast<long>(spline.get_nb_basis()), 3}, TensorRealTypeOption.requires_grad(true));
+
+    Tensor expected_spline_smoothness_log_prior = torch::tensor({
+        {0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27, 0.00},
+        {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.27, -0.54, 0.27}
+    }, TensorRealTypeOption.requires_grad(false));
+
+    std::cout << "r_spline_smoothness_log_prior: " << spline.get_smoothing_design_matrix() << std::endl;
+    std::cout << "expected_spline_smoothness_log_prior: " << expected_spline_smoothness_log_prior << std::endl;
+
+    EXPECT_TRUE(spline.get_smoothing_design_matrix().allclose(expected_spline_smoothness_log_prior, 1e-4));
 }

@@ -26,13 +26,13 @@ namespace mc3d
 
         inline void calculate_covariance_factors();
 
-        inline Tensor pdf(const Tensor x) const;
+        inline Tensor prob(const Tensor x) const;
 
-        inline Tensor log_pdf(const Tensor x) const;
+        inline Tensor log_prob(const Tensor x) const;
 
-        inline Tensor pdf(const Tensor x, const Tensor mean) const;
+        inline Tensor prob(const Tensor x, const Tensor mean) const;
 
-        inline Tensor log_pdf(const Tensor x, const Tensor mean) const;
+        inline Tensor log_prob(const Tensor x, const Tensor mean) const;
 
     private:
         Tensor mean;

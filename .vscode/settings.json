@@ -2,6 +2,7 @@
     "files.associations": {
         "chrono": "cpp",
         "alignedvector3": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "complex": "cpp"
     }
 }

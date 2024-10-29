@@ -18,7 +18,11 @@ target_link_libraries(multivariate_normal_test GTest::gtest_main "${TORCH_LIBRAR
 add_executable(spline_window_test spline_window_test.cpp)
 target_link_libraries(spline_window_test GTest::gtest_main "${TORCH_LIBRARIES}")
 
+add_executable(person_hypothesis_test person_hypothesis_test.cpp)
+target_link_libraries(person_hypothesis_test GTest::gtest_main "${TORCH_LIBRARIES}")
+
 include(GoogleTest)
 gtest_discover_tests(camera_test)
 gtest_discover_tests(multivariate_normal_test)
 gtest_discover_tests(spline_window_test)
+gtest_discover_tests(person_hypothesis_test)

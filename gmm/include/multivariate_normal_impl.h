@@ -42,22 +42,22 @@ namespace mc3d
         log_factor = factor.log();
     }
 
-    inline Tensor MultivariateNormal::pdf(const Tensor x) const
+    inline Tensor MultivariateNormal::prob(const Tensor x) const
     {
-        return pdf(x, mean);
+        return prob(x, mean);
     }
 
-    inline Tensor MultivariateNormal::log_pdf(const Tensor x) const
+    inline Tensor MultivariateNormal::log_prob(const Tensor x) const
     {
-        return log_pdf(x, mean);
+        return log_prob(x, mean);
     }
 
-    inline Tensor MultivariateNormal::pdf(const Tensor x, const Tensor mean) const
+    inline Tensor MultivariateNormal::prob(const Tensor x, const Tensor mean) const
     {
         return factor * (x - mean).transpose(0, 1).mm(covariance_inf).mm(x - mean).exp();
     }
 
-    inline Tensor MultivariateNormal::log_pdf(const Tensor x, const Tensor mean) const
+    inline Tensor MultivariateNormal::log_prob(const Tensor x, const Tensor mean) const
     {
         return log_factor + ((x - mean).transpose(0, 1).mm(covariance_inf).mm(x - mean));
     }

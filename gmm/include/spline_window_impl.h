@@ -5,14 +5,28 @@
 
 namespace mc3d
 {
-    SplineWindow::SplineWindow(Tensor knots, size_t degree, RealType lambda) : degree(degree), knots(knots), lambda(lambda)
+    SplineWindow::SplineWindow(Tensor knots, size_t degree, RealType lambda, AugmentationMode augmentation_mode) : degree(degree), knots(knots), lambda(lambda), augmentation_mode(augmentation_mode)
     {
-        for (int i = 0; i < degree; i++)
+        if (augmentation_mode == AugmentationMode::Same)
         {
-            this->knots = torch::cat({this->knots[0].reshape(1), this->knots, this->knots[-1].reshape(1)});
+            for (int i = 0; i < degree; i++)
+            {
+                this->knots = torch::cat({this->knots[0].reshape(1), this->knots, this->knots[-1].reshape(1)});
+            }
+        }
+        else if (augmentation_mode == AugmentationMode::Uniform)
+        {
+            Tensor knot_diff_start = this->knots[1] - this->knots[0];
+            Tensor knot_diff_end = this->knots[-1] - this->knots[-2];
+
+            for (int i = 0; i < degree; i++)
+            {
+                this->knots = torch::cat({(this->knots[0] - knot_diff_start).reshape(1), this->knots, (this->knots[-1] + knot_diff_end).reshape(1)});
+            }
         }
 
         nb_basis = this->knots.size(0) - degree - 1;
+        calc_smoothing_design_matrix();
     }
 
     void SplineWindow::prepare_time_projection(RealType time_delta_forward)
@@ -23,7 +37,7 @@ namespace mc3d
     // shift forward according to time_delta_forward
     SplineParameter SplineWindow::project_forward_spline_parameter(SplineParameter spline_parameter)
     {
-
+        return spline_parameter;
     }
 
     // use design_matrix
@@ -35,36 +49,7 @@ namespace mc3d
     // val tensor, no grad
     Tensor SplineWindow::spline_smoothness_log_prior(SplineParameter spline_parameter)
     {
-        Tensor r_spline_smoothness_log_prior = torch::zeros({static_cast<long>(nb_basis) - 2, spline_parameter.size(0)},
-            TensorRealTypeOption.requires_grad(false));
-
-        RealType N;
-        RealType s;
-        RealType d_j;
-        RealType b0;
-        RealType b2;
-        RealType b1;
-        RealType r_degree = static_cast<RealType>(degree);
-
-        for (int j = 2; j < nb_basis; j++)
-        {
-            /*auto basisFunc = [&](RealType t)
-            {
-                return basis(t, j, degree - 2);
-            };*/
-            N = basis_int(j, degree - 2);
-            s = std::sqrt(N);
-            d_j = (r_degree - 1.0) * (r_degree - 2.0) * s / (knots[j + degree - 2] - knots[j]).item().to<RealType>();
-            b0 = d_j / (knots[j + degree - 2] - knots[j - 1]).item().to<RealType>();
-            b2 = d_j / (knots[j + degree - 1] - knots[j]).item().to<RealType>();
-            b1 = -(b0 + b2);
-            r_spline_smoothness_log_prior[j - 2][j - 2] = lambda * b0;
-            r_spline_smoothness_log_prior[j - 2][j - 1] = lambda * b1;
-            r_spline_smoothness_log_prior[j - 2][j - 0] = lambda * b2;
-            std::cout << "r_spline_smoothness_log_prior: " << r_spline_smoothness_log_prior << std::endl;
-        }
-
-        return r_spline_smoothness_log_prior;
+        return smoothing_design_matrix.mm(spline_parameter).norm(2, -1).log();
     }
 
     // according to Cox DeBoor
@@ -86,16 +71,20 @@ namespace mc3d
 
     inline RealType SplineWindow::basis_int(const int j, const int k)
     {
-        /*Scalar h{(knots[knots.size() - 1] - knots[0]) / 100};
-        Scalar integral{0.5 * (basis(knots[0], j, k) + basis(knots[knots.size() - 1], j, k))};
+        RealType h{(knots[knots.size(0) - 1] - knots[0]).item().to<RealType>() / 100.0};
+        RealType integral{0.5 * (basis(knots[0].item().to<RealType>(), j, k) + basis(knots[knots.size(0) - 1].item().to<RealType>(), j, k))};
         for (int i = 1; i < 100; ++i)
         {
-            integral += basis(knots[0] + i * h, j, k);
+            integral += basis(knots[0].item().to<RealType>() + i * h, j, k);
         }
         integral *= h;
-        return integral;*/
-        return (knots[j + k + 1] - knots[j]).item().to<RealType>() / (static_cast<RealType>(k) + 1.0);
+        return integral;
     }
+
+    /*inline RealType SplineWindow::basis_int(const int j, const int k)
+    {
+        return (knots[j + k + 1] - knots[j]).item().to<RealType>() / (static_cast<RealType>(k) + 1.0);
+    }*/
 
     Tensor SplineWindow::design_matrix(RealType time_point)
     {
@@ -122,6 +111,33 @@ namespace mc3d
         }
 
         return r_design_matrix;
+    }
+
+    void SplineWindow::calc_smoothing_design_matrix()
+    {
+        smoothing_design_matrix = torch::zeros({static_cast<long>(nb_basis) - 2, static_cast<long>(nb_basis)},
+                                               TensorRealTypeOption.requires_grad(false));
+
+        RealType N;
+        RealType s;
+        RealType d_j;
+        RealType b0;
+        RealType b2;
+        RealType b1;
+        RealType r_degree = static_cast<RealType>(degree);
+
+        for (int j = 2; j < nb_basis; j++)
+        {
+            N = basis_int(j, degree + 1 - 2);
+            s = std::sqrt(N);
+            d_j = (r_degree + 1 - 1.0) * (r_degree + 1 - 2.0) * s / (knots[j + degree + 1 - 2] - knots[j]).item().to<RealType>();
+            b0 = d_j / (knots[j + degree + 1 - 2] - knots[j - 1]).item().to<RealType>();
+            b2 = d_j / (knots[j + degree + 1 - 1] - knots[j]).item().to<RealType>();
+            b1 = -(b0 + b2);
+            smoothing_design_matrix[j - 2][j - 2] = lambda * b0;
+            smoothing_design_matrix[j - 2][j - 1] = lambda * b1;
+            smoothing_design_matrix[j - 2][j - 0] = lambda * b2;
+        }
     }
 }
 
