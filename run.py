@@ -139,7 +139,7 @@ def runner(args: LiveArgs):
             config.elevation,
             config.center
         )
-
+    
     fit_times: list[float] = []
     loop_times: list[float] = []
     inference_times: list[float] = []

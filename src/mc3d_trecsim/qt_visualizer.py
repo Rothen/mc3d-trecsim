@@ -281,6 +281,20 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
             color) if isinstance(color, list) else color, size=size, pxMode=px_mode)
         self.view.addItem(scatter)
         return [scatter]
+    
+    def mesh(self, vertices: npt.NDArray[np.double], faces: npt.NDArray[np.double], color, edge_color, draw_edges: bool = False, draw_faces: bool = True, only_projection: bool = False) -> None:
+        """Draws a mesh."""
+        vertices = self.preprocess_points(vertices)
+
+        if only_projection:
+            vertices[1, :] = 0
+
+        mesh_data: gl.MeshData = gl.MeshData(
+            vertexes=vertices,
+            faces=faces)
+        mesh_item: gl.GLMeshItem = gl.GLMeshItem(
+            meshdata=mesh_data, color=color, edgeColor=edge_color, drawEdges=draw_edges, drawFaces=draw_faces)
+        self.view.addItem(mesh_item)
 
     def draw_measurements(self, measurements_list: list[list[str]]) -> None:
         """Draws the measurements.

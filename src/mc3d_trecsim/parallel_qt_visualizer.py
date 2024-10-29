@@ -14,6 +14,7 @@ import numpy.typing as npt
 from PyQt6.QtCore import QTimer
 import PyQt6.QtCore as QtCore
 import PyQt6.QtWidgets as QtWidgets
+import pyqtgraph.opengl as gl
 
 from .gmm import Camera
 from .enums import LIMB_KPTS, LIMBS, Color
@@ -114,6 +115,19 @@ class ParallelQtVisualizer(Process):
     @scatter_data.setter
     def scatter_data(self, values: list):
         self._scatter_data[:] = values
+
+    @property
+    def mesh_data(self):
+        """Return the mesh data.
+
+        Returns:
+            tuple[Any]: The mesh data.
+        """
+        return self._mesh_data
+    
+    @mesh_data.setter
+    def mesh_data(self, values: list):
+        self._mesh_data[:] = values
 
     @property
     def camera_position_data(self):
@@ -302,6 +316,7 @@ class ParallelQtVisualizer(Process):
         self.skeletons_updated: Event = manager.Event()
         self.line_updated: Event = manager.Event()
         self.scatter_updated: Event = manager.Event()
+        self.mesh_updated: Event = manager.Event()
         self.camera_position_updated: Event = manager.Event()
         self.activate_window_updated: Event = manager.Event()
         self.on_pause_event: Event = manager.Event()
@@ -314,6 +329,7 @@ class ParallelQtVisualizer(Process):
         self._visualise_skeletons_data: ListProxy[Any] = manager.list()
         self._line_data: ListProxy[Any] = manager.list()
         self._scatter_data: ListProxy[Any] = manager.list()
+        self._mesh_data: ListProxy[Any] = manager.list()
         self._camera_position_data: ListProxy[Any] = manager.list()
 
         self._distance = manager.Value(
@@ -466,6 +482,14 @@ class ParallelQtVisualizer(Process):
         """
         self.scatter_data = self.scatter_data + [(pos, color, size, px_mode)]
         self.scatter_updated.set()
+        
+    def mesh(self, vertices: npt.NDArray[np.double], faces: npt.NDArray[np.double],
+             color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (1.0, 0.0, 0.0, 1.0),
+             edge_color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (1.0, 0.0, 0.0, 1.0),
+             draw_edges: bool = False, draw_faces: bool = True, only_projection: bool = False):
+        self.mesh_data = self.mesh_data + \
+            [(vertices, faces, color, edge_color, draw_edges, draw_faces, only_projection)]
+        self.mesh_updated.set()
 
     def get_camera_position(self) -> tuple[float, float, float, list[float]]:
         """Gets the camera position."""
@@ -533,6 +557,13 @@ class ParallelQtVisualizer(Process):
                     for (pos, color, size, px_mode) in self.scatter_data:
                         _ = visualizer.scatter(pos, color, size, px_mode)
                     self.scatter_data = []
+                    
+                if self.mesh_updated.is_set():
+                    self.mesh_updated.clear()
+                    for (vertices, faces, color, edge_color, draw_edges, draw_faces, only_projection) in self.mesh_data:
+                        _ = visualizer.mesh(vertices, faces,
+                                            color, edge_color, draw_edges, draw_faces, only_projection)
+                    self.mesh_data = []
 
                 if self.camera_position_updated.is_set():
                     self.camera_position_updated.clear()
