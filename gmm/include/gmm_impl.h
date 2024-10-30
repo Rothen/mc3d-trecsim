@@ -29,9 +29,9 @@
 namespace MC3D_TRECSIM
 {
     template <typename Scalar>
-    Scalar LO{100.0};
+    Scalar LO{1.0};
     template <typename Scalar>
-    Scalar HI{400.0};
+    Scalar HI{4.0};
 
     template <typename Scalar>
     GMM<Scalar>::GMM(int J, std::vector<Camera<Scalar>> camerasE, GMMParam<Scalar> gmmParamE, LBFGSpp::LBFGSParam<Scalar> lbfgsParamE) :

@@ -81,7 +81,7 @@ class SkeletonCalculator:
         skeleton_keypoint_validity: SkeletonValidity = {}
 
         for keypoint in self.keypoints:
-            valid: bool = bool(1500 >= np.linalg.norm(skeleton[keypoint]) >= 100) and fit_results[keypoint]['supports'][person_index]
+            valid: bool = bool(1500 >= np.linalg.norm(skeleton[keypoint]) >= 1) and fit_results[keypoint]['supports'][person_index]
             skeleton_keypoint_validity[keypoint] = valid
             if valid:
                 skeleton_valid = True
@@ -119,10 +119,10 @@ class SkeletonCalculator:
             p_ws: npt.NDArray[np.double] = self.point_desing_matrix @ w
             path_ws: npt.NDArray[np.double] = self.path_desing_matrix @ w
 
-            p_ws = (self.rotation_matrix @ p_ws.T + self.translation_vector).T
-            path_ws = (self.rotation_matrix @ path_ws.T + self.translation_vector).T
+            p_ws = (self.rotation_matrix @ p_ws.T + self.translation_vector*100).T
+            path_ws = (self.rotation_matrix @ path_ws.T + self.translation_vector*100).T
 
-            skeleton[keypoint] = np.array([p_ws[0, 0], p_ws[0, 1], p_ws[0, 2]])
-            paths[keypoint] = path_ws
+            skeleton[keypoint] = np.array([p_ws[0, 0], p_ws[0, 1], p_ws[0, 2]]) / 100
+            paths[keypoint] = path_ws / 100
 
         return skeleton, paths

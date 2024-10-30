@@ -74,8 +74,12 @@ def create_visualizer(
                                       show_floor=config.show_floor,
                                       position=config.visualizer_position
                                       )
-    visualizer.visualise_cameras(
-        cameras, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
+    P_copies = []
+    for camera in cameras:
+        P_copies.append(camera.P.copy())
+        P_copies[-1][0:3, 3] /= 100
+        
+    visualizer.visualise_cameras(P_copies, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
 
     logging.info('Visualizer created.')
 

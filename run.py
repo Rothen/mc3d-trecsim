@@ -64,7 +64,7 @@ def runner(args: LiveArgs):
         config.keypoints, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
     visualizer: ParallelQtVisualizer = create_visualizer(
         config, cameras, rotation_matrix, translation_vector)
-
+    
     caps, is_live = create_video_streamers(
         config, overwrite_max_fps=np.inf)
 

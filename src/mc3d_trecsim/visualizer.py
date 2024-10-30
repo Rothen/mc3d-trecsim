@@ -27,10 +27,7 @@ class Visualizer(ABC, Generic[IT]):
 
     def __init__(self,
                  keypoints: Sequence[int] | None = None,
-                 rotation_matrix: npt.NDArray[np.double] = np.eye(3),
-                 translation_vector: npt.NDArray[np.double] = np.zeros((3, 1)),
-                 correct_axis: bool = False,
-                 scale_factor: float = 1.0,
+                 correct_axis: bool = True,
                  project_feet_to_ground: bool = False,
                  limbs: list[Limb] = LIMBS
                  ) -> None:
@@ -49,14 +46,11 @@ class Visualizer(ABC, Generic[IT]):
             limbs (list[Limb], optional): Additional
                 limbs to draw. Defaults to [].
         """
-        self.rotation_matrix: npt.NDArray[np.double] = rotation_matrix
-        self.translation_vector: npt.NDArray[np.double] = translation_vector
         self.keypoints: Sequence[int] = keypoints if keypoints is not None else []
         self.limbs: list[Limb] = limbs
         self.path_t_start: float = -1
         self.skeletons: list[Skeleton] = []
         self.correct_axis: bool = correct_axis
-        self.scale_factor: float = scale_factor
         self.project_feet_to_ground: bool = project_feet_to_ground
         self.all_items: list[IT] = []
         self.skeleton_items: list[IT] = []
@@ -248,8 +242,8 @@ class Visualizer(ABC, Generic[IT]):
         return rot_pnts[12], rot_pnts
 
     def visualise_cameras(self,
-                          cameras: list[Camera],
-                          size: int = 10,
+                          extrinsic_camera_matrices: list[npt.NDArray[np.double]],
+                          size: int = 1e-1,
                           edge: int = 2,
                           color: Color = (1.0, 1.0, 1.0, 1.0)
                           ) -> None:
@@ -261,8 +255,8 @@ class Visualizer(ABC, Generic[IT]):
             edge (int, optional): The edge size of the camera. Defaults to 2.
             color (Color, optional): The color of the camera. Defaults to (1.0, 1.0, 1.0, 1.0).
         """
-        for camera in cameras:
-            _ = self.draw_camera(camera.P, size, edge, color)
+        for P in extrinsic_camera_matrices:
+            _ = self.draw_camera(P, size, edge, color)
 
     def visualise_skeletons(self,
                     skeletons: list[Skeleton],
@@ -385,15 +379,13 @@ class Visualizer(ABC, Generic[IT]):
         Returns:
             npt.NDArray[np.double]: The preprocessed points.
         """
-        if reposition:
-            pos = self._inherent_reposition(pos)
 
-        if self.correct_axis:
-            temp = np.copy(pos[:, 1])
-            pos[:, 1] = pos[:, 2]
-            pos[:, 2] = -temp
+        #if self.correct_axis:
+        #    temp = np.copy(pos[:, 1])
+        #    pos[:, 1] = pos[:, 2]
+        #    pos[:, 2] = -temp
 
-        return pos * self.scale_factor
+        return pos
 
     def draw_3d_line(self,
                      start_point: npt.NDArray[np.double],
@@ -418,15 +410,13 @@ class Visualizer(ABC, Generic[IT]):
         Returns:
             list[IT]: The drawn items.
         """
-        pos = self.preprocess_points(np.array([start_point, end_point]))
-        return self.line(pos, color, linewidth, markersize, draw_point)
+        return self.line(self.preprocess_points(np.array([start_point, end_point])), color, linewidth, markersize, draw_point)
 
     def draw_3d_path(self,
                      pos: npt.NDArray[np.double],
                      color: ColorsLike = (
                          1.0, 0.0, 0.0, 1.0),
-                     linewidth: int = 2,
-                     reposition: bool = True
+                     linewidth: int = 2
                      ) -> list[IT]:
         """Draws a 3D path.
 
@@ -435,24 +425,12 @@ class Visualizer(ABC, Generic[IT]):
             color (ColorsLike, optional):
                 The color of the path. Defaults to (1.0, 0.0, 0.0, 1.0).
             linewidth (int, optional): The width of the line. Defaults to 2.
-            reposition (bool, optional): Whether to reposition the points. Defaults to True.
 
         Returns:
             list[IT]: The drawn items.
         """
-        pos = self.preprocess_points(pos, reposition=reposition)
+        pos = self.preprocess_points(pos)
         return self.line(pos, color, linewidth, draw_point=False)
-
-    def _inherent_reposition(self, pos: npt.NDArray[np.double]) -> npt.NDArray[np.double]:
-        """Repositions the points to the origin.
-
-        Args:
-            pos (npt.NDArray[np.double]): The points to reposition.
-
-        Returns:
-            npt.NDArray[np.double]: The repositioned points.
-        """
-        return (self.rotation_matrix @ pos.T + self.translation_vector).T
 
     def clear(self) -> None:
         """Clears the visualizer."""

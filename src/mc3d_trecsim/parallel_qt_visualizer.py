@@ -261,8 +261,6 @@ class ParallelQtVisualizer(Process):
 
     def __init__(self,
                  keypoints: list[int] | None = None,
-                 rotation_matrix: npt.NDArray[np.double] = np.eye(3),
-                 translation_vector: npt.NDArray[np.double] = np.zeros((3, 1)),
                  project_feet_to_ground: bool = False,
                  limbs: list[Limb] = LIMBS,
                  measurements: list[Measurement[Any]] | None = None,
@@ -293,8 +291,6 @@ class ParallelQtVisualizer(Process):
         super().__init__()
 
         self.keypoints: list[int] = keypoints if keypoints is not None else []
-        self.rotation_matrix = rotation_matrix
-        self.translation_vector = translation_vector
         self.project_feet_to_ground = project_feet_to_ground
         self.limbs = limbs if limbs is not None else []
         self.measurements = measurements if measurements is not None else []
@@ -396,8 +392,8 @@ class ParallelQtVisualizer(Process):
         self.event_checker.start()
 
     def visualise_cameras(self,
-                          cameras: list[Camera],
-                          size: int = 10,
+                          extrinsic_camera_matrices: list[npt.NDArray[np.double]],
+                          size: int = 1e-1,
                           edge: int = 2,
                           color: Color = (1.0, 1.0, 1.0, 1.0),
                           rotation_matrix: npt.NDArray[np.double] = np.eye(3),
@@ -412,7 +408,7 @@ class ParallelQtVisualizer(Process):
             color (Color, optional): The color of the camera. Defaults to (1.0, 1.0, 1.0, 1.0).
         """
         self.visualise_cameras_data = [
-            (camera.P, size, edge, color, rotation_matrix, translation_vector) for camera in cameras]
+            (P, size, edge, color, rotation_matrix, translation_vector) for P in extrinsic_camera_matrices]
         self.camera_updated.set()
 
     def visualise_skeletons(self,
@@ -458,7 +454,8 @@ class ParallelQtVisualizer(Process):
         Returns:
             list[IT]: The drawn items.
         """
-        self.line_data = [(pos, color, linewidth, markersize, draw_point)]
+        self.line_data = self.line_data+ [(
+            pos, color, linewidth, markersize, draw_point)]
         self.line_updated.set()
 
     def scatter(self,
@@ -511,8 +508,6 @@ class ParallelQtVisualizer(Process):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
         visualizer = QtVisualizer(
             self.keypoints,
-            self.rotation_matrix,
-            self.translation_vector,
             self.project_feet_to_ground,
             self.limbs,
             self.measurements,

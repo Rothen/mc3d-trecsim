@@ -134,14 +134,6 @@ namespace MC3D_TRECSIM
     template <typename Scalar>
     Scalar BSpline<Scalar>::basisInt(const int j, const int k)
     {
-        /*Scalar h{(knots[knots.size() - 1] - knots[0]) / 100};
-        Scalar integral{0.5 * (basis(knots[0], j, k) + basis(knots[knots.size() - 1], j, k))};
-        for (int i = 1; i < 100; ++i)
-        {
-            integral += basis(knots[0] + i * h, j, k);
-        }
-        integral *= h;
-        return integral;*/
         return (knots[j + k + 1] - knots[j]) / (k + 1);
     }
 

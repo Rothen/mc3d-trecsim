@@ -71,8 +71,6 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
     def __init__(self,
                  keypoints: Sequence[int] | None = None,
-                 rotation_matrix: npt.NDArray[np.double] = np.eye(3),
-                 translation_vector: npt.NDArray[np.double] = np.zeros((3, 1)),
                  project_feet_to_ground: bool = False,
                  limbs: list[Limb] = LIMBS,
                  measurements: list[Measurement[float]] | None = None,
@@ -103,10 +101,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
         super().__init__(
             keypoints,
-            rotation_matrix,
-            translation_vector,
             correct_axis=True,
-            scale_factor=1e-2,
             project_feet_to_ground=project_feet_to_ground,
             limbs=limbs
         )
@@ -157,6 +152,13 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         #     QtCore.Qt.WindowType.CustomizeWindowHint | QtCore.Qt.WindowType.FramelessWindowHint)
 
         self.view = gl.GLViewWidget()
+        transform = np.array([
+            [1, 0, 0, 0],  # X-axis remains the same
+            [0, 0, 1, 0],  # Z-axis becomes the Y-axis
+            [0, 1, 0, 0],  # Y-axis becomes the Z-axis
+            [0, 0, 0, 1]   # Homogeneous coordinate
+        ])
+        # self.view.(transform
         self.view.setMouseTracking(True)
         self.view.setCameraParams(distance=20)
         self.view.setWindowTitle('MC3D-TRECSIM: 3D Visualizer')
@@ -196,6 +198,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
         if self.show_floor:
             floor = gl.GLGridItem()
+            # floor.rotate(90, 1, 0, 0)
             floor.setSize(20, 20, 1)
             self.view.addItem(floor)
 
@@ -248,6 +251,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         line_mode = 'line_strip'
         line = gl.GLLinePlotItem(pos=pos, color=np.array(color) if isinstance(
             color, list) else color, width=linewidth, mode=line_mode, glOptions='translucent')
+        line.rotate(90, 1, 0, 0)
         self.view.addItem(line)
         items: list[GLGraphicsItem] = [line]
 
@@ -276,16 +280,16 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         Returns:
             list[GLGraphicsItem]: The drawn items.
         """
-        pos = self.preprocess_points(pos, reposition=True)
+        pos = self.preprocess_points(pos)
         scatter = gl.GLScatterPlotItem(pos=np.array(pos), color=np.array(
             color) if isinstance(color, list) else color, size=size, pxMode=px_mode)
+        scatter.rotate(90, 1, 0, 0)
         self.view.addItem(scatter)
         return [scatter]
     
     def mesh(self, vertices: npt.NDArray[np.double], faces: npt.NDArray[np.double], color, edge_color, draw_edges: bool = False, draw_faces: bool = True, only_projection: bool = False) -> None:
         """Draws a mesh."""
         vertices = self.preprocess_points(vertices)
-
         if only_projection:
             vertices[1, :] = 0
 
@@ -294,6 +298,7 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
             faces=faces)
         mesh_item: gl.GLMeshItem = gl.GLMeshItem(
             meshdata=mesh_data, color=color, edgeColor=edge_color, drawEdges=draw_edges, drawFaces=draw_faces)
+        mesh_item.rotate(90, 1, 0, 0)
         self.view.addItem(mesh_item)
 
     def draw_measurements(self, measurements_list: list[list[str]]) -> None:
