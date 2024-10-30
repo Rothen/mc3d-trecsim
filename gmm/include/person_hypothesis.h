@@ -15,7 +15,7 @@ namespace mc3d
         PersonHypothesis(SplineWindow& spline, const PoseParameter& pose_parameter);
 
     public:
-        Tensor parameter_log_prior() const; //sum all priors
+        inline Tensor parameter_log_prior() const;                                 // sum all priors
         Tensor predict(size_t limb_id, RealType time, const Camera& camera) const; //use  spline.evaluate with slice of spline_parameter and cam.transform
         void project_forward_spline_parameters(); // use spline project_forward_spline_parameter on slices
     protected:

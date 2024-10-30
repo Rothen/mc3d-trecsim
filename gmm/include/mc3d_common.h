@@ -8,8 +8,9 @@
 using namespace torch::autograd;
 using std::array;
 using std::vector;
-using torch::Tensor;
+using std::pair;
 using torch::kDouble;
+using torch::Tensor;
 
 using RealType = double;
 torch::TensorOptions TensorRealTypeOption = torch::dtype(torch::kDouble);

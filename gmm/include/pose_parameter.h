@@ -8,7 +8,7 @@ namespace mc3d
     struct PoseParameter
     {
         size_t nb_keypoints;
-        vector<std::pair<size_t, size_t>> edges;
+        vector<pair<size_t, size_t>> edges;
         vector<RealType> average_limb_lengths; // index according to edges
     };
 }

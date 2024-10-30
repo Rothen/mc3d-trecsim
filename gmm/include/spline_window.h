@@ -29,6 +29,7 @@ namespace mc3d
     protected:
         size_t degree;
         size_t nb_basis;
+        int order;
         Tensor knots;
         RealType lambda;
         AugmentationMode augmentation_mode;

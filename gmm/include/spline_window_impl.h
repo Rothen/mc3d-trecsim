@@ -24,7 +24,7 @@ namespace mc3d
                 this->knots = torch::cat({(this->knots[0] - knot_diff_start).reshape(1), this->knots, (this->knots[-1] + knot_diff_end).reshape(1)});
             }
         }
-
+        order = degree + 1;
         nb_basis = this->knots.size(0) - degree - 1;
         calc_smoothing_design_matrix();
     }
@@ -124,15 +124,14 @@ namespace mc3d
         RealType b0;
         RealType b2;
         RealType b1;
-        RealType r_degree = static_cast<RealType>(degree);
 
         for (int j = 2; j < nb_basis; j++)
         {
-            N = basis_int(j, degree + 1 - 2);
+            N = basis_int(j, order - 2);
             s = std::sqrt(N);
-            d_j = (r_degree + 1 - 1.0) * (r_degree + 1 - 2.0) * s / (knots[j + degree + 1 - 2] - knots[j]).item().to<RealType>();
-            b0 = d_j / (knots[j + degree + 1 - 2] - knots[j - 1]).item().to<RealType>();
-            b2 = d_j / (knots[j + degree + 1 - 1] - knots[j]).item().to<RealType>();
+            d_j = (order - 1.0) * (order - 2.0) * s / (knots[j + order - 2] - knots[j]).item().to<RealType>();
+            b0 = d_j / (knots[j + order - 2] - knots[j - 1]).item().to<RealType>();
+            b2 = d_j / (knots[j + order - 1] - knots[j]).item().to<RealType>();
             b1 = -(b0 + b2);
             smoothing_design_matrix[j - 2][j - 2] = lambda * b0;
             smoothing_design_matrix[j - 2][j - 1] = lambda * b1;

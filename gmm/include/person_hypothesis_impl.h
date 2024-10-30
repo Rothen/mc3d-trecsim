@@ -22,7 +22,7 @@ namespace mc3d
     { }
 
     // sum all priors
-    Tensor PersonHypothesis::parameter_log_prior() const
+    inline Tensor PersonHypothesis::parameter_log_prior() const
     {
         return smoothness_log_prior() + limb_length_log_prior() + scale_limb_length_log_prior();
     }
@@ -60,6 +60,7 @@ namespace mc3d
     Tensor PersonHypothesis::limb_length_log_prior() const
     {
         Tensor prob_sum{torch::zeros({1}, TensorRealTypeOption.requires_grad(false))};
+        RealType time = 0.0;
 
         for (int i = 0; i < pose_parameter.edges.size(); i++)
         {
@@ -67,7 +68,10 @@ namespace mc3d
             MultivariateNormal mvn(
                 torch::tensor({pose_parameter.average_limb_lengths[i]}, TensorRealTypeOption.requires_grad(false)).reshape({1, 1}),
                 scale_factor);
-            // prob_sum += mvn.log_prob((pose_parameter[edge.first] - pose_parameter[edge.second]).norm());
+            prob_sum += mvn.log_prob((
+                spline.evaluate(time, spline_parameters.index({Slice(edge.first, edge.first + 1), Slice(), Slice()}))
+                - spline.evaluate(time, spline_parameters.index({Slice(edge.second, edge.second + 1), Slice(), Slice()})))
+                .norm(2).reshape({1, 1}));
         }
 
         return prob_sum;
