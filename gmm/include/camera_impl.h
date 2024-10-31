@@ -85,6 +85,7 @@ namespace MC3D_TRECSIM
     inline void Camera<Scalar>::projectGrad(const WorldPoint<Scalar> &PW, CameraPointGrad<Scalar> &dest)
     {
         tempPC << RT * (PW - t);
+
         tempDP << (1.0 / tempPC[2]), 0, (-tempPC[0] / (tempPC[2] * tempPC[2])),
             0.0, (1.0 / tempPC[2]), (-tempPC[1] / (tempPC[2] * tempPC[2])),
             0.0, 0.0, 0.0;

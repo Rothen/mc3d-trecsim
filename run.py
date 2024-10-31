@@ -209,7 +209,7 @@ def runner(args: LiveArgs):
 
         fit_start = time.perf_counter()
         fit_result = gmm.fit()
-        print(fit_result[0]['niters'])        
+    
         fit_times.append(time.perf_counter() - fit_start)
 
         skeletons, paths, validities, keypoint_validitites = skeleton_calculator.calculate(
