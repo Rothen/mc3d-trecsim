@@ -480,12 +480,18 @@ class ParallelQtVisualizer(Process):
         self.scatter_data = self.scatter_data + [(pos, color, size, px_mode)]
         self.scatter_updated.set()
         
-    def mesh(self, vertices: npt.NDArray[np.double], faces: npt.NDArray[np.double],
-             color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (1.0, 0.0, 0.0, 1.0),
-             edge_color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (1.0, 0.0, 0.0, 1.0),
-             draw_edges: bool = False, draw_faces: bool = True, only_projection: bool = False):
+    def mesh(self,
+             vertices: npt.NDArray[np.double],
+             faces: npt.NDArray[np.double],
+             color=None,
+             edge_color=None,
+             vertex_colors=None,
+             face_colors=None,
+             draw_edges: bool = False,
+             draw_faces: bool = True,
+             only_projection: bool = False):
         self.mesh_data = self.mesh_data + \
-            [(vertices, faces, color, edge_color, draw_edges, draw_faces, only_projection)]
+            [(vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection)]
         self.mesh_updated.set()
 
     def get_camera_position(self) -> tuple[float, float, float, list[float]]:
@@ -555,9 +561,9 @@ class ParallelQtVisualizer(Process):
                     
                 if self.mesh_updated.is_set():
                     self.mesh_updated.clear()
-                    for (vertices, faces, color, edge_color, draw_edges, draw_faces, only_projection) in self.mesh_data:
+                    for (vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection) in self.mesh_data:
                         _ = visualizer.mesh(vertices, faces,
-                                            color, edge_color, draw_edges, draw_faces, only_projection)
+                                            color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection)
                     self.mesh_data = []
 
                 if self.camera_position_updated.is_set():

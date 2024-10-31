@@ -287,7 +287,17 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         self.view.addItem(scatter)
         return [scatter]
     
-    def mesh(self, vertices: npt.NDArray[np.double], faces: npt.NDArray[np.double], color, edge_color, draw_edges: bool = False, draw_faces: bool = True, only_projection: bool = False) -> None:
+    def mesh(self,
+             vertices: npt.NDArray[np.double],
+             faces: npt.NDArray[np.double],
+             color=None,
+             edge_color=None,
+             vertex_colors=None,
+             face_colors=None,
+             draw_edges: bool = False,
+             draw_faces: bool = True,
+             only_projection: bool = False
+        ) -> None:
         """Draws a mesh."""
         vertices = self.preprocess_points(vertices)
         if only_projection:
@@ -295,9 +305,13 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
         mesh_data: gl.MeshData = gl.MeshData(
             vertexes=vertices,
-            faces=faces)
+            faces=faces,
+            vertexColors=vertex_colors,
+            faceColors=face_colors
+        )
         mesh_item: gl.GLMeshItem = gl.GLMeshItem(
             meshdata=mesh_data, color=color, edgeColor=edge_color, drawEdges=draw_edges, drawFaces=draw_faces)
+        mesh_item.setGLOptions('translucent')
         mesh_item.rotate(90, 1, 0, 0)
         self.view.addItem(mesh_item)
 
