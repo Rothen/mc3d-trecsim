@@ -37,7 +37,7 @@ def create_cameras(config: LiveConfig) -> list[Camera]:
 
     if config.camera_distances is None:
         for camera in cameras:
-            camera.distance = 300.0
+            camera.distance = 3.0
     else:
         for camera, camera_distance in zip(cameras, config.camera_distances):
             camera.distance = camera_distance
@@ -73,13 +73,8 @@ def create_visualizer(
                                       ],
                                       show_floor=config.show_floor,
                                       position=config.visualizer_position
-                                      )
-    P_copies = []
-    for camera in cameras:
-        P_copies.append(camera.P.copy())
-        P_copies[-1][0:3, 3] /= 100
-        
-    visualizer.visualise_cameras(P_copies, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
+                                      )        
+    visualizer.visualise_cameras([camera.P for camera in cameras], rotation_matrix=rotation_matrix, translation_vector=translation_vector)
 
     logging.info('Visualizer created.')
 

@@ -70,7 +70,7 @@ namespace MC3D_TRECSIM
     template <typename Scalar>
     inline void Camera<Scalar>::projectSingle(const WorldPoint<Scalar> &PW, CameraPoint<Scalar> &dest) const
     {
-        dest << (A * (RT * (PW - t) + limiter).hnormalized().homogeneous()).head(2);
+        dest << (A * (RT * (PW - t)).hnormalized().homogeneous()).head(2);
     }
 
     template <typename Scalar>
@@ -84,7 +84,7 @@ namespace MC3D_TRECSIM
     template <typename Scalar>
     inline void Camera<Scalar>::projectGrad(const WorldPoint<Scalar> &PW, CameraPointGrad<Scalar> &dest)
     {
-        tempPC << RT * (PW - t) + limiter;
+        tempPC << RT * (PW - t);
         tempDP << (1.0 / tempPC[2]), 0, (-tempPC[0] / (tempPC[2] * tempPC[2])),
             0.0, (1.0 / tempPC[2]), (-tempPC[1] / (tempPC[2] * tempPC[2])),
             0.0, 0.0, 0.0;

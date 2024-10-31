@@ -119,10 +119,10 @@ class SkeletonCalculator:
             p_ws: npt.NDArray[np.double] = self.point_desing_matrix @ w
             path_ws: npt.NDArray[np.double] = self.path_desing_matrix @ w
 
-            p_ws = (self.rotation_matrix @ p_ws.T + self.translation_vector*100).T
-            path_ws = (self.rotation_matrix @ path_ws.T + self.translation_vector*100).T
+            p_ws = (self.rotation_matrix @ p_ws.T + self.translation_vector).T
+            path_ws = (self.rotation_matrix @ path_ws.T + self.translation_vector).T
 
-            skeleton[keypoint] = np.array([p_ws[0, 0], p_ws[0, 1], p_ws[0, 2]]) / 100
-            paths[keypoint] = path_ws / 100
+            skeleton[keypoint] = np.array([p_ws[0, 0], p_ws[0, 1], p_ws[0, 2]])
+            paths[keypoint] = path_ws
 
         return skeleton, paths
