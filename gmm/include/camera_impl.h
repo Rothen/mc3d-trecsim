@@ -89,7 +89,7 @@ namespace MC3D_TRECSIM
             0.0, (1.0 / tempPC[2]), (-tempPC[1] / (tempPC[2] * tempPC[2])),
             0.0, 0.0, 0.0;
 
-        dest << (A * tempDP * RT).topRows(2);
+        dest << (A * tempDP * RT).topRows(2) / 100.0;
     }
 
     template <typename Scalar>

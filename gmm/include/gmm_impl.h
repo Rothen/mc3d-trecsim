@@ -499,7 +499,7 @@ namespace MC3D_TRECSIM
                 }
                 else
                 {
-                    rowsToAdd = ColMatrix<Scalar>::Random(spline.getNumBasis() - oldNumberOfRows, J * 3) * 50;
+                    rowsToAdd = ColMatrix<Scalar>::Random(spline.getNumBasis() - oldNumberOfRows, J * 3) * 0.5;
                 }
 
                 gmmContainer.parameters.theta.conservativeResize(spline.getNumBasis(), Eigen::NoChange);

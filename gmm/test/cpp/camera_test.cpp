@@ -67,6 +67,31 @@ TEST(Camera, ToCameraCoordinates)
     EXPECT_TRUE(PCs.isApprox(expectedPCs));
 }
 
+TEST(Camera, ToCameraCoordinatesMeters)
+{
+    IntrinsicMatrix<double> A;
+    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    DistortionVector<double> d;
+    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
+    ExtrinsicMatrix<double> P;
+    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+00, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+00, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    unsigned int height = 1280;
+    unsigned int width = 1920;
+
+    Camera<double> camera("camera_0");
+    camera.setCalibration(A, d, P, height, width);
+
+    WorldPoints<double> PWs(3, 1);
+    PWs << 1.00, -2.00, 1.50;
+
+    WorldPoints<double> PCs = camera.toCameraCoordinates(PWs);
+
+    WorldPoints<double> expectedPCs(3, 1);
+    expectedPCs << 2.247517984765653694e+00, -2.892665076210431039e+00, 3.305087326421007106e+00;
+
+    EXPECT_TRUE(PCs.isApprox(expectedPCs));
+}
+
 TEST(Camera, ToCameraCoordinatesSinglePoint)
 {
     IntrinsicMatrix<double> A;
@@ -119,6 +144,33 @@ TEST(Camera, Project)
     EXPECT_TRUE(ps.isApprox(expectedps));
 }
 
+TEST(Camera, ProjectMeters)
+{
+    IntrinsicMatrix<double> A;
+    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    DistortionVector<double> d;
+    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
+    ExtrinsicMatrix<double> P;
+    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+00, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+00, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    unsigned int height = 1280;
+    unsigned int width = 1920;
+
+    Camera<double> camera("camera_0");
+    camera.setCalibration(A, d, P, height, width);
+
+    WorldPoints<double> PWs(3, 1);
+    PWs << 1.00, -2.00, 1.50;
+
+    std::cout << PWs << std::endl;
+
+    CameraPoints<double> ps = camera.project(PWs);
+
+    CameraPoints<double> expectedps(2, 1);
+    expectedps << 1.699573690735038781e+03, -4.083944520518871286e+02;
+
+    EXPECT_TRUE(ps.isApprox(expectedps));
+}
+
 TEST(Camera, ProjectGrad)
 {
     IntrinsicMatrix<double> A;
@@ -142,6 +194,36 @@ TEST(Camera, ProjectGrad)
 
     CameraPointGrad<double> expectedpGrad(2, 3);
     expectedpGrad << -5.619072862381639666e-02, 1.162684432384638367e+00, -3.997247651837172455e+00, 6.739469736839276415e-01, 3.561795023615820899e+00, 2.791301108698526434e+00;
+
+    EXPECT_TRUE(pGrad.isApprox(expectedpGrad));
+}
+
+TEST(Camera, ProjectGradMeters)
+{
+    IntrinsicMatrix<double> A;
+    A << 1.137844469366448493e+03, 0.000000000000000000e+00, 9.258192763436687756e+02, 0.000000000000000000e+00, 1.137868503272385851e+03, 5.874861875982957145e+02, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    DistortionVector<double> d;
+    d << -4.122490927804370875e-01, 1.995424107684372617e-01, -6.780183396248970658e-04, 1.457061937740045934e-03, -5.264488616219945710e-02;
+    ExtrinsicMatrix<double> P;
+    P << 4.894621227523461293e-01, -4.552116929303474668e-01, 7.437803069524321353e-01, -3.875108756319725103e+00, 4.786322175197727513e-01, 8.532140054413278607e-01, 2.072125992088085233e-01, -1.292527896409998505e+00, -7.289293729456041149e-01, 2.545744989944053183e-01, 6.354949202935263886e-01, 1.774314430787018466e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 1.000000000000000000e+00;
+    unsigned int height = 1280;
+    unsigned int width = 1920;
+
+    Camera<double> camera("camera_0");
+    camera.setCalibration(A, d, P, height, width);
+
+    WorldPoint<double> PW;
+    PW << 1.00, -2.00, 1.50;
+
+    std::cout << PW << std::endl;
+
+    CameraPointGrad<double> pGrad = camera.projectGrad(PW);
+
+    CameraPointGrad<double> expectedpGrad(2, 3);
+    expectedpGrad << -5.619072862381639666e-02, 1.162684432384638367e+00, -3.997247651837172455e+00, 6.739469736839276415e-01, 3.561795023615820899e+00, 2.791301108698526434e+00;
+
+    std::cout << "pGrad: " << pGrad << std::endl;
+    std::cout << "expectedpGrad: " << expectedpGrad << std::endl;
 
     EXPECT_TRUE(pGrad.isApprox(expectedpGrad));
 }

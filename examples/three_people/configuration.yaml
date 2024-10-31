@@ -31,8 +31,8 @@ keypoints:
 - 14
 - 15
 - 16
-lbfgs-max-iterations: 40
-lbfgs-max-linesearch: 10
+lbfgs-max-iterations: 10
+lbfgs-max-linesearch: 5
 max-fps: 25.0
 max-frame-buffer: 20
 max-iter: 5
@@ -58,7 +58,7 @@ spline-degree: 3
 spline-knot-delta: 1000.0
 spline-smoothing-factor: 100.0
 times-csv-file: null
-tol: 1.0e-6
+tol: 1.0e-8
 translation-vector:
 - 0.0
 - 2.3
