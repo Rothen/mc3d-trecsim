@@ -219,20 +219,20 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
             elevation=elevation,
         )
 
-    def remove_item(self, item: GLGraphicsItem, force: bool = False) -> None:
+    def remove_item(self, item: GLGraphicsItem) -> None:
         """Removes an item from the visualizer.
 
         Args:
             item (GLGraphicsItem): The item to remove.
         """
-        if item in self.view.items or force:
+        if item in self.view.items:
             self.view.removeItem(item)
     
     def clear_item_group(self, item_group: Optional[int | str]) -> None:
         """Clears an item group."""
         if item_group in self.item_groups:
             for item in self.item_groups[item_group]:
-                self.remove_item(item, True)
+                self.remove_item(item)
             del self.item_groups[item_group]
     
     def _add_item(self, item: GLGraphicsItem, item_group: Optional[int | str] = None) -> None:
@@ -241,9 +241,9 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
 
         if item_group is not None:
             if not item_group in self.item_groups:
-                self.item_groups[item] = []
+                self.item_groups[item_group] = []
 
-            self.item_groups[item].append(item)
+            self.item_groups[item_group].append(item)
 
     def line(self,
              pos: npt.NDArray[np.double],
