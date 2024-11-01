@@ -1,7 +1,7 @@
 """A module for visualizing 3D data in real-time."""
 import sys
 from threading import Event
-from typing import Annotated, Literal, Sequence, TypeVar, Generic, TypeAlias
+from typing import Annotated, Any, Sequence, TypeVar, Generic, TypeAlias, Optional
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -60,6 +60,7 @@ class Visualizer(ABC, Generic[IT]):
         self.path_t_end: float = 0
         self.path_design_matrix: npt.NDArray[np.double] = np.array([])
         self.point_desing_matrix: npt.NDArray[np.double] = np.array([])
+        self.item_groups: dict[Any, list[IT]] = {}
 
     @abstractmethod
     def remove_item(self, item: IT) -> None:
@@ -75,7 +76,8 @@ class Visualizer(ABC, Generic[IT]):
              color: ColorsLike = (1.0, 0.0, 0.0, 1.0),
              linewidth: int = 2,
              markersize: int = 3,
-             draw_point: bool = False
+             draw_point: bool = False,
+            item_group: Optional[int | str] = None
              ) -> list[IT]:
         """Draws a line.
 
@@ -96,7 +98,8 @@ class Visualizer(ABC, Generic[IT]):
                 pos: npt.NDArray[np.double],
                 color: ColorsLike = (1.0, 0.0, 0.0, 1.0),
                 markersize: int = 3,
-                px_mode: bool = True) -> list[IT]:
+                px_mode: bool = True,
+                item_group: Optional[int | str] = None) -> list[IT]:
         """Draws a scatter plot.
 
         Args:
@@ -366,27 +369,6 @@ class Visualizer(ABC, Generic[IT]):
 
         return items
 
-    def preprocess_points(self,
-                          pos: npt.NDArray[np.double],
-                          reposition: bool = True
-                          ) -> npt.NDArray[np.double]:
-        """Preprocesses the points.
-
-        Args:
-            pos (npt.NDArray[np.double]): The points to preprocess.
-            reposition (bool, optional): Whether to reposition the points. Defaults to True.
-
-        Returns:
-            npt.NDArray[np.double]: The preprocessed points.
-        """
-
-        #if self.correct_axis:
-        #    temp = np.copy(pos[:, 1])
-        #    pos[:, 1] = pos[:, 2]
-        #    pos[:, 2] = -temp
-
-        return pos
-
     def draw_3d_line(self,
                      start_point: npt.NDArray[np.double],
                      end_point: npt.NDArray[np.double],
@@ -410,7 +392,7 @@ class Visualizer(ABC, Generic[IT]):
         Returns:
             list[IT]: The drawn items.
         """
-        return self.line(self.preprocess_points(np.array([start_point, end_point])), color, linewidth, markersize, draw_point)
+        return self.line(np.array([start_point, end_point]), color, linewidth, markersize, draw_point)
 
     def draw_3d_path(self,
                      pos: npt.NDArray[np.double],
@@ -429,7 +411,6 @@ class Visualizer(ABC, Generic[IT]):
         Returns:
             list[IT]: The drawn items.
         """
-        pos = self.preprocess_points(pos)
         return self.line(pos, color, linewidth, draw_point=False)
 
     def clear(self) -> None:

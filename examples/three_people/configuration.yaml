@@ -61,7 +61,7 @@ times-csv-file: null
 tol: 1.0e-8
 translation-vector:
 - 0.0
-- 2.3
+- 230.0
 - 0.0
 undistort-images: true
 weights-file: ./data/models/yolov7/yolov7-w6-pose.pt

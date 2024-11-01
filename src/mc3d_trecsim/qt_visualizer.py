@@ -1,5 +1,5 @@
 """A module for the PyQt visualizer."""
-from typing import Annotated, Any, Callable, Sequence
+from typing import Optional, Any, Callable, Sequence
 
 import numpy as np
 import numpy.typing as npt
@@ -227,13 +227,31 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         """
         if item in self.view.items:
             self.view.removeItem(item)
+    
+    def clear_item_group(self, item_group: Optional[int | str]) -> None:
+        """Clears an item group."""
+        if item_group in self.item_groups:
+            for item in self.item_groups[item_group]:
+                self.remove_item(item)
+            del self.item_groups[item_group]
+    
+    def _add_item(self, item: GLGraphicsItem, item_group: Optional[int | str] = None) -> None:
+        item.rotate(90, 1, 0, 0)
+        self.view.addItem(item)
+
+        if item_group is not None:
+            if not item_group in self.item_groups:
+                self.item_groups[item_group] = []
+
+            self.item_groups[item_group].append(item)
 
     def line(self,
              pos: npt.NDArray[np.double],
              color: ColorsLike = (1.0, 0.0, 0.0, 1.0),
              linewidth: int = 2,
              markersize: int = 10,
-             draw_point: bool = False
+             draw_point: bool = False,
+            item_group: Optional[int | str] = None
              ) -> list[GLGraphicsItem]:
         """Draws a line.
 
@@ -251,12 +269,11 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         line_mode = 'line_strip'
         line = gl.GLLinePlotItem(pos=pos, color=np.array(color) if isinstance(
             color, list) else color, width=linewidth, mode=line_mode, glOptions='translucent')
-        line.rotate(90, 1, 0, 0)
-        self.view.addItem(line)
+        self._add_item(line, item_group)
         items: list[GLGraphicsItem] = [line]
 
         if draw_point:
-            # scatter = self.scatter(pos=pos, color=color, size=markersize, pxMode=True)
+            # scatter = self.scatter(pos=pos, color=color, size=markersize, px_mode=True, item_group=item_group)
             # items += scatter
             pass
 
@@ -266,7 +283,8 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
                 pos: npt.NDArray[np.double],
                 color: ColorsLike = (1.0, 0.0, 0.0, 1.0),
                 size: int = 3,
-                px_mode: bool = True
+                px_mode: bool = True,
+                item_group: Optional[int | str] = None
                 ) -> list[GLGraphicsItem]:
         """Draws a scatter plot.
 
@@ -280,11 +298,10 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         Returns:
             list[GLGraphicsItem]: The drawn items.
         """
-        pos = self.preprocess_points(pos)
-        scatter = gl.GLScatterPlotItem(pos=np.array(pos), color=np.array(
-            color) if isinstance(color, list) else color, size=size, pxMode=px_mode)
-        scatter.rotate(90, 1, 0, 0)
-        self.view.addItem(scatter)
+        scatter = gl.GLScatterPlotItem(pos=np.array(pos), color=np.array(color) if isinstance(color, list) else color, size=size, pxMode=px_mode)
+        
+        self._add_item(scatter, item_group)
+        
         return [scatter]
     
     def mesh(self,
@@ -296,10 +313,11 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
              face_colors=None,
              draw_edges: bool = False,
              draw_faces: bool = True,
-             only_projection: bool = False
-        ) -> None:
+             only_projection: bool = False,
+             gl_option: str = 'translucent',
+             item_group: Optional[int | str] = None
+        ) -> list[GLGraphicsItem]:
         """Draws a mesh."""
-        vertices = self.preprocess_points(vertices)
         if only_projection:
             vertices[1, :] = 0
 
@@ -311,9 +329,9 @@ class QtVisualizer(Visualizer[GLGraphicsItem]):
         )
         mesh_item: gl.GLMeshItem = gl.GLMeshItem(
             meshdata=mesh_data, color=color, edgeColor=edge_color, drawEdges=draw_edges, drawFaces=draw_faces)
-        mesh_item.setGLOptions('translucent')
-        mesh_item.rotate(90, 1, 0, 0)
-        self.view.addItem(mesh_item)
+        mesh_item.setGLOptions(gl_option)
+        self._add_item(mesh_item, item_group)
+        return [mesh_item]
 
     def draw_measurements(self, measurements_list: list[list[str]]) -> None:
         """Draws the measurements.
