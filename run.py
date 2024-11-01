@@ -63,7 +63,18 @@ def runner(args: LiveArgs):
     skeleton_calculator: SkeletonCalculator = SkeletonCalculator(config.keypoints)
     visualizer: ParallelQtVisualizer = create_visualizer(config, cameras)
     
-    visualizer.mesh(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), np.array([[0, 1, 2]]))
+    visualizer.mesh(
+        np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+        np.array([[0, 1, 2]]),
+        face_colors=[
+            [
+                [1, 0, 0, 0.5],
+                [1, 0, 0, 0.5],
+                [1, 0, 0, 0.5]
+            ]
+        ],
+        item_group='mesh'
+    )
     
     caps, is_live = create_video_streamers(
         config, overwrite_max_fps=np.inf)
@@ -177,6 +188,10 @@ def runner(args: LiveArgs):
         all_kpts = pose_estimator.predict(frames)
         inference_end = time.perf_counter()
 
+        if current_loop == 100:
+            print('100 loops done')
+            visualizer.clear_item_group('mesh')
+        
         if start_timestamp == 0.0:
             start_timestamp = timestamps[0]
 
