@@ -38,7 +38,11 @@ def runner(args: LiveArgs):
 
     config = create_or_load_config(args, LiveConfig)
 
-    cameras: list[Camera] = create_cameras(config)
+    rotation_matrix = Rotation.from_rotvec(
+        np.array(config.rotation_degrees), degrees=True).as_matrix()
+    translation_vector = np.array(config.translation_vector).reshape((3, 1))
+
+    cameras: list[Camera] = create_cameras(config, rotation_matrix, translation_vector)
 
     pose_estimator: PoseEstimator = create_pose_estimator(config)
     pose_estimator.predict(
@@ -56,14 +60,10 @@ def runner(args: LiveArgs):
 
     gmm = GMM(J=0, cameras=cameras, gmmParam=gmm_param, lbfgsParam=lbfgs_param)
 
-    rotation_matrix = Rotation.from_rotvec(
-        np.array(config.rotation_degrees), degrees=True).as_matrix()
-    translation_vector = np.array(config.translation_vector).reshape((3, 1))
-
-    skeleton_calculator: SkeletonCalculator = SkeletonCalculator(
-        config.keypoints, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
-    visualizer: ParallelQtVisualizer = create_visualizer(
-        config, cameras, rotation_matrix, translation_vector)
+    skeleton_calculator: SkeletonCalculator = SkeletonCalculator(config.keypoints)
+    visualizer: ParallelQtVisualizer = create_visualizer(config, cameras)
+    
+    visualizer.mesh(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), np.array([[0, 1, 2]]))
     
     caps, is_live = create_video_streamers(
         config, overwrite_max_fps=np.inf)

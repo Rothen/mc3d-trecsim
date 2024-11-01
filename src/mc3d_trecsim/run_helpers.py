@@ -18,7 +18,9 @@ from .enums import KPT_IDXS, COLORS, LIMB_KPTS, LIMBS
 from .config import LiveConfig
 
 
-def create_cameras(config: LiveConfig) -> list[Camera]:
+def create_cameras(config: LiveConfig,
+    rotation_matrix: npt.NDArray[np.double] = np.eye(3, 3),
+    translation_vector: npt.NDArray[np.double] = np.zeros((3, 1))) -> list[Camera]:
     """Create the cameras.
 
     Args:
@@ -35,6 +37,13 @@ def create_cameras(config: LiveConfig) -> list[Camera]:
     calibration = Calibration(Path(config.calibration_file))
     calibration.load_calibration(cameras)
 
+    P: npt.NDArray[np.double] = np.eye(4)
+    P[:3, :3] = rotation_matrix
+    P[:3, 3] = translation_vector[:, 0]
+
+    for camera in cameras:
+        camera.transformWorldCenter(P)
+
     if config.camera_distances is None:
         for camera in cameras:
             camera.distance = 300.0
@@ -50,9 +59,7 @@ def create_cameras(config: LiveConfig) -> list[Camera]:
 
 def create_visualizer(
     config: LiveConfig,
-    cameras: list[Camera],
-    rotation_matrix: npt.NDArray[np.double] = np.eye(3, 3),
-    translation_vector: npt.NDArray[np.double] = np.zeros((3, 1))
+    cameras: list[Camera]
 ) -> ParallelQtVisualizer:
     """Create the visualizer.
 
@@ -74,12 +81,11 @@ def create_visualizer(
                                       show_floor=config.show_floor,
                                       position=config.visualizer_position
                                       )
-    P_copies = []
-    for camera in cameras:
-        P_copies.append(camera.P.copy())
-        P_copies[-1][0:3, 3] /= 100
-        
-    visualizer.visualise_cameras(P_copies, rotation_matrix=rotation_matrix, translation_vector=translation_vector)
+
+    P_copies = [camera.P.copy() for camera in cameras]
+    for P_copy in P_copies:
+        P_copy[:3, 3] /= 100
+    visualizer.visualise_cameras(P_copies)
 
     logging.info('Visualizer created.')
 

@@ -6,7 +6,7 @@ from multiprocessing import Process
 from threading import Thread
 from multiprocessing.managers import ListProxy, ValueProxy
 from threading import Event
-from typing import Annotated, Any, cast, Callable
+from typing import Optional, Any, cast, Callable
 import time
 
 import numpy as np
@@ -89,6 +89,19 @@ class ParallelQtVisualizer(Process):
     @visualise_skeletons_data.setter
     def visualise_skeletons_data(self, values: list):
         self._visualise_skeletons_data[:] = values
+
+    @property
+    def clear_item_group_data(self):
+        """Return the mesh data.
+
+        Returns:
+            tuple[Any]: The mesh data.
+        """
+        return self._clear_item_group_data
+    
+    @clear_item_group_data.setter
+    def clear_item_group_data(self, values: list):
+        self._clear_item_group_data[:] = values
 
     @property
     def line_data(self):
@@ -310,6 +323,7 @@ class ParallelQtVisualizer(Process):
         self.is_drawing: Event = manager.Event()
         self.camera_updated: Event = manager.Event()
         self.skeletons_updated: Event = manager.Event()
+        self.clear_item_group_updated: Event = manager.Event()
         self.line_updated: Event = manager.Event()
         self.scatter_updated: Event = manager.Event()
         self.mesh_updated: Event = manager.Event()
@@ -323,6 +337,7 @@ class ParallelQtVisualizer(Process):
         self._point_desing_matrix: ListProxy[Any] = manager.list()
         self._visualise_cameras_data: ListProxy[Any] = manager.list()
         self._visualise_skeletons_data: ListProxy[Any] = manager.list()
+        self._clear_item_group_data: ListProxy[Any] = manager.list()
         self._line_data: ListProxy[Any] = manager.list()
         self._scatter_data: ListProxy[Any] = manager.list()
         self._mesh_data: ListProxy[Any] = manager.list()
@@ -432,6 +447,10 @@ class ParallelQtVisualizer(Process):
         """
         self.visualise_skeletons_data = [(skeletons, paths, skeleton_validities, skeleton_keypoint_validitites, measurements, head, tail)]
         self.skeletons_updated.set()
+        
+    def clear_item_group(self, item_group: int | str) -> None:
+        self.clear_item_group_data = self.clear_item_group_data + [(item_group)]
+        self.clear_item_group_updated.set()
 
     def line(self,
              pos: npt.NDArray[np.double],
@@ -439,7 +458,8 @@ class ParallelQtVisualizer(Process):
                  1.0, 0.0, 0.0, 1.0),
              linewidth: int = 2,
              markersize: int = 10,
-             draw_point: bool = True
+             draw_point: bool = True,
+            item_group: Optional[int | str] = None
              ) -> None:
         """Draws a line.
 
@@ -454,16 +474,15 @@ class ParallelQtVisualizer(Process):
         Returns:
             list[IT]: The drawn items.
         """
-        self.line_data = self.line_data+ [(
-            pos, color, linewidth, markersize, draw_point)]
+        self.line_data = self.line_data+ [(pos, color, linewidth, markersize, draw_point, item_group)]
         self.line_updated.set()
 
     def scatter(self,
                 pos: npt.NDArray[np.double],
-                color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (
-                    1.0, 0.0, 0.0, 1.0),
+                color: Color | npt.NDArray[np.double] | list[tuple[float, ...]] = (1.0, 0.0, 0.0, 1.0),
                 size: int = 3,
-                px_mode: bool = True
+                px_mode: bool = True,
+                item_group: Optional[int | str] = None
                 ) -> None:
         """Draws a scatter plot.
 
@@ -477,7 +496,7 @@ class ParallelQtVisualizer(Process):
         Returns:
             list[IT]: The drawn items.
         """
-        self.scatter_data = self.scatter_data + [(pos, color, size, px_mode)]
+        self.scatter_data = self.scatter_data + [(pos, color, size, px_mode, item_group)]
         self.scatter_updated.set()
         
     def mesh(self,
@@ -489,9 +508,11 @@ class ParallelQtVisualizer(Process):
              face_colors=None,
              draw_edges: bool = False,
              draw_faces: bool = True,
-             only_projection: bool = False):
+             only_projection: bool = False,
+             gl_option: str = 'translucent',
+            item_group: Optional[int | str] = None) -> None:
         self.mesh_data = self.mesh_data + \
-            [(vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection)]
+            [(vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection, gl_option, item_group)]
         self.mesh_updated.set()
 
     def get_camera_position(self) -> tuple[float, float, float, list[float]]:
@@ -502,7 +523,7 @@ class ParallelQtVisualizer(Process):
         """Sets the camera position."""
         self.camera_position_data = self.camera_position_data + [(distance, azimuth, elevation, center[0], center[1], center[2])]
         self.camera_position_updated.set()
-    
+
     def activate_window(self) -> None:
         """Activates the window."""
         self.activate_window_updated.set()
@@ -545,25 +566,31 @@ class ParallelQtVisualizer(Process):
                         visualizer.visualise_skeletons(
                             skeletons, paths, skeleton_validities, skeleton_keypoint_validitites, measurements, head, tail)
                     self.visualise_skeletons_data = []
+                    
+                if self.clear_item_group_updated.is_set():
+                    self.clear_item_group_updated.clear()
+                    for (item_group) in self.clear_item_group_data:
+                        visualizer.clear_item_group(item_group)
+                    self.clear_item_group_data = []
 
                 if self.line_updated.is_set():
                     self.line_updated.clear()
-                    for (pos, color, linewidth, markersize, draw_point) in self.line_data:
+                    for (pos, color, linewidth, markersize, draw_point, item_group) in self.line_data:
                         _ = visualizer.line(
-                            pos, color, linewidth, markersize, draw_point)
+                            pos, color, linewidth, markersize, draw_point, item_group)
                     self.line_data = []
 
                 if self.scatter_updated.is_set():
                     self.scatter_updated.clear()
-                    for (pos, color, size, px_mode) in self.scatter_data:
-                        _ = visualizer.scatter(pos, color, size, px_mode)
+                    for (pos, color, size, px_mode, item_group) in self.scatter_data:
+                        _ = visualizer.scatter(pos, color, size, px_mode, item_group)
                     self.scatter_data = []
                     
                 if self.mesh_updated.is_set():
                     self.mesh_updated.clear()
-                    for (vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection) in self.mesh_data:
+                    for (vertices, faces, color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection, gl_option, item_group) in self.mesh_data:
                         _ = visualizer.mesh(vertices, faces,
-                                            color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection)
+                                            color, edge_color, vertex_colors, face_colors, draw_edges, draw_faces, only_projection, gl_option, item_group)
                     self.mesh_data = []
 
                 if self.camera_position_updated.is_set():

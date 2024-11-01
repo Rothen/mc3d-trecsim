@@ -147,7 +147,8 @@ PYBIND11_MODULE(gmm, m)
              { return camera.projectSingle(PW); })
         .def("projectGrad", [](CameraD &camera, WorldPointD &PW)
              { return camera.projectGrad(PW); })
-        .def("transformWorldCenter", &CameraD::transformWorldCenter)
+        .def("transformWorldCenter", &CameraD::transformWorldCenter,
+             py::arg("P"))
         .def(py::pickle(
             [](const CameraD &camera)
             {
