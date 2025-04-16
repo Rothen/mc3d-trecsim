@@ -12,13 +12,12 @@ namespace mc3d
     {
         using torch::indexing::Slice;
         Tensor sum{torch::zeros({1})}; // use global shared torch::TensorOptions() object to define type, grad,...
-        static constexpr RealType half{RealType(1) / RealType(2)};
         for (auto &measurement : measurements)
         {
             for (size_t m_ind{0}, end{measurement.limb_ids.size()}; m_ind < end; ++m_ind)
             {
                 Tensor tmp{measurement.values.index({static_cast<int64_t>(m_ind), Slice()}) - hypothesis.predict(measurement.limb_ids[m_ind], measurement.time, measurement.camera)};
-                sum -= half * torch::inner(tmp, tmp) + log_normalization;
+                sum -= (RealType(0.5)) * torch::inner(tmp, tmp) + log_normalization;
             }
         }
         return sum;
